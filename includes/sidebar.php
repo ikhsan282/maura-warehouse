@@ -1,0 +1,124 @@
+<?php
+$current_url = $_SERVER['REQUEST_URI'] ?? '';
+function nav_active(string $path): string {
+    global $current_url;
+    return str_contains($current_url, $path) ? 'active' : '';
+}
+?>
+<nav id="sidebar" class="sidebar bg-dark text-white d-flex flex-column">
+  <div class="sidebar-header d-flex align-items-center justify-content-between px-3 py-3 border-bottom border-secondary">
+    <a href="<?= APP_URL ?>/pages/dashboard.php" class="text-white text-decoration-none d-flex align-items-center gap-2">
+      <i class="bi bi-boxes fs-5 text-primary"></i>
+      <span class="fw-bold sidebar-label"><?= APP_NAME ?></span>
+    </a>
+  </div>
+  <div class="sidebar-menu flex-grow-1 overflow-y-auto py-2">
+
+    <?php if (can('dashboard.view')): ?>
+    <a href="<?= APP_URL ?>/pages/dashboard.php" class="sidebar-link <?= nav_active('/dashboard') ?>">
+      <i class="bi bi-speedometer2"></i><span class="sidebar-label">Dashboard</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('items.view') || can('categories.view') || can('units.view') || can('suppliers.view') || can('locations.view')): ?>
+    <div class="sidebar-section-title sidebar-label">DATA MASTER</div>
+    <?php endif; ?>
+
+    <?php if (can('items.view')): ?>
+    <a href="<?= APP_URL ?>/pages/items/index.php" class="sidebar-link <?= nav_active('/items') ?>">
+      <i class="bi bi-box-seam"></i><span class="sidebar-label">Barang</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('categories.view')): ?>
+    <a href="<?= APP_URL ?>/pages/categories/index.php" class="sidebar-link <?= nav_active('/categories') ?>">
+      <i class="bi bi-tags"></i><span class="sidebar-label">Kategori</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('units.view')): ?>
+    <a href="<?= APP_URL ?>/pages/units/index.php" class="sidebar-link <?= nav_active('/units') ?>">
+      <i class="bi bi-rulers"></i><span class="sidebar-label">Satuan</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('suppliers.view')): ?>
+    <a href="<?= APP_URL ?>/pages/suppliers/index.php" class="sidebar-link <?= nav_active('/suppliers') ?>">
+      <i class="bi bi-truck"></i><span class="sidebar-label">Supplier</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('locations.view')): ?>
+    <a href="<?= APP_URL ?>/pages/locations/index.php" class="sidebar-link <?= nav_active('/locations') ?>">
+      <i class="bi bi-geo-alt"></i><span class="sidebar-label">Lokasi Rak</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('stock_in.view') || can('stock_out.view') || can('transfers.view')): ?>
+    <div class="sidebar-section-title sidebar-label">TRANSAKSI</div>
+    <?php endif; ?>
+
+    <?php if (can('stock_in.view')): ?>
+    <a href="<?= APP_URL ?>/pages/stock-in/index.php" class="sidebar-link <?= nav_active('/stock-in') ?>">
+      <i class="bi bi-box-arrow-in-down"></i><span class="sidebar-label">Barang Masuk</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('stock_out.view')): ?>
+    <a href="<?= APP_URL ?>/pages/stock-out/index.php" class="sidebar-link <?= nav_active('/stock-out') ?>">
+      <i class="bi bi-box-arrow-up"></i><span class="sidebar-label">Barang Keluar</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('transfers.view')): ?>
+    <a href="<?= APP_URL ?>/pages/transfers/index.php" class="sidebar-link <?= nav_active('/transfers') ?>">
+      <i class="bi bi-arrow-left-right"></i><span class="sidebar-label">Transfer Lokasi</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('stock.view')): ?>
+    <div class="sidebar-section-title sidebar-label">STOK</div>
+    <a href="<?= APP_URL ?>/pages/stock/index.php" class="sidebar-link <?= nav_active('/stock') ?>">
+      <i class="bi bi-clipboard-data"></i><span class="sidebar-label">Cek Stok</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('reports.view')): ?>
+    <div class="sidebar-section-title sidebar-label">LAPORAN</div>
+    <a href="<?= APP_URL ?>/pages/reports/mutation.php" class="sidebar-link <?= nav_active('/reports/mutation') ?>">
+      <i class="bi bi-arrow-down-up"></i><span class="sidebar-label">Mutasi Barang</span>
+    </a>
+    <a href="<?= APP_URL ?>/pages/reports/stock.php" class="sidebar-link <?= nav_active('/reports/stock') ?>">
+      <i class="bi bi-bar-chart-line"></i><span class="sidebar-label">Laporan Stok</span>
+    </a>
+    <a href="<?= APP_URL ?>/pages/reports/stock-in.php" class="sidebar-link <?= nav_active('/reports/stock-in') ?>">
+      <i class="bi bi-file-earmark-arrow-down"></i><span class="sidebar-label">Laporan Masuk</span>
+    </a>
+    <a href="<?= APP_URL ?>/pages/reports/stock-out.php" class="sidebar-link <?= nav_active('/reports/stock-out') ?>">
+      <i class="bi bi-file-earmark-arrow-up"></i><span class="sidebar-label">Laporan Keluar</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('users.view') || can('roles.view')): ?>
+    <div class="sidebar-section-title sidebar-label">PENGGUNA</div>
+    <?php endif; ?>
+
+    <?php if (can('users.view')): ?>
+    <a href="<?= APP_URL ?>/pages/users/index.php" class="sidebar-link <?= nav_active('/users') ?>">
+      <i class="bi bi-people"></i><span class="sidebar-label">Pengguna</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('roles.view')): ?>
+    <a href="<?= APP_URL ?>/pages/roles/index.php" class="sidebar-link <?= nav_active('/roles') ?>">
+      <i class="bi bi-shield-lock"></i><span class="sidebar-label">Peran & Izin</span>
+    </a>
+    <?php endif; ?>
+
+  </div>
+  <div class="sidebar-footer px-3 py-2 border-top border-secondary">
+    <a href="<?= APP_URL ?>/auth/logout.php" class="sidebar-link text-danger">
+      <i class="bi bi-box-arrow-right"></i><span class="sidebar-label">Keluar</span>
+    </a>
+  </div>
+</nav>

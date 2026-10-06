@@ -1,0 +1,173 @@
+<?php
+require_once __DIR__ . '/../config/database.php';
+
+// CSRF
+function csrf_token(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field(): string {
+    return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
+}
+
+function verify_csrf(): void {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals(csrf_token(), $token)) {
+        http_response_code(403);
+        die('CSRF token tidak valid.');
+    }
+}
+
+// Flash messages
+function set_flash(string $type, string $message): void {
+    $_SESSION['flash'] = ['type' => $type, 'message' => $message];
+}
+
+function get_flash(): ?array {
+    if (!empty($_SESSION['flash'])) {
+        $f = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+        return $f;
+    }
+    return null;
+}
+
+function flash_html(): string {
+    $f = get_flash();
+    if (!$f) return '';
+    $map = ['success' => 'success', 'error' => 'danger', 'warning' => 'warning', 'info' => 'info'];
+    $cls = $map[$f['type']] ?? 'info';
+    $msg = htmlspecialchars($f['message']);
+    return "<div class=\"alert alert-{$cls} alert-dismissible fade show\" role=\"alert\">{$msg}
+        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button></div>";
+}
+
+// Redirect
+function redirect(string $url): void {
+    header('Location: ' . $url);
+    exit;
+}
+
+// Format currency IDR
+function idr(float $amount): string {
+    return 'Rp ' . number_format($amount, 0, ',', '.');
+}
+
+// Format date to Indonesian
+function tgl(string $date): string {
+    if (!$date) return '-';
+    $bulan = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    $d = date_create($date);
+    return $d ? date_format($d, 'd') . ' ' . $bulan[(int)date_format($d, 'n')] . ' ' . date_format($d, 'Y') : '-';
+}
+
+// Pagination helper
+function paginate(int $total, int $page, int $per_page = PER_PAGE): array {
+    $total_pages = max(1, (int)ceil($total / $per_page));
+    $page = max(1, min($page, $total_pages));
+    return [
+        'total'       => $total,
+        'per_page'    => $per_page,
+        'current'     => $page,
+        'total_pages' => $total_pages,
+        'offset'      => ($page - 1) * $per_page,
+    ];
+}
+
+function pagination_html(array $p, string $url_pattern): string {
+    if ($p['total_pages'] <= 1) return '';
+    $html = '<nav><ul class="pagination pagination-sm mb-0">';
+    $prev = $p['current'] - 1;
+    $next = $p['current'] + 1;
+    $html .= '<li class="page-item ' . ($p['current'] == 1 ? 'disabled' : '') . '">
+        <a class="page-link" href="' . sprintf($url_pattern, $prev) . '">&#8249;</a></li>';
+    for ($i = 1; $i <= $p['total_pages']; $i++) {
+        if ($p['total_pages'] > 7 && abs($i - $p['current']) > 2 && $i != 1 && $i != $p['total_pages']) {
+            if ($i == 2 || $i == $p['total_pages'] - 1) { $html .= '<li class="page-item disabled"><span class="page-link">…</span></li>'; }
+            continue;
+        }
+        $active = $i == $p['current'] ? 'active' : '';
+        $html .= '<li class="page-item ' . $active . '"><a class="page-link" href="' . sprintf($url_pattern, $i) . '">' . $i . '</a></li>';
+    }
+    $html .= '<li class="page-item ' . ($p['current'] == $p['total_pages'] ? 'disabled' : '') . '">
+        <a class="page-link" href="' . sprintf($url_pattern, $next) . '">&#8250;</a></li>';
+    $html .= '</ul></nav>';
+    return $html;
+}
+
+// Auto-generate reference number
+function generate_ref(string $prefix): string {
+    return $prefix . date('Ymd') . strtoupper(substr(uniqid(), -5));
+}
+
+// Send email (shared hosting compatible)
+function send_mail(string $to, string $subject, string $body): bool {
+    $from      = MAIL_FROM;
+    $from_name = MAIL_FROM_NAME;
+    $headers   = "From: {$from_name} <{$from}>\r\n";
+    $headers  .= "Reply-To: {$from}\r\n";
+    $headers  .= "MIME-Version: 1.0\r\n";
+    $headers  .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers  .= "X-Mailer: PHP/" . PHP_VERSION;
+    return mail($to, $subject, $body, $headers);
+}
+
+// Email templates
+function email_template(string $title, string $body): string {
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px}
+    .box{background:#fff;max-width:520px;margin:auto;padding:32px;border-radius:8px}
+    .btn{display:inline-block;padding:12px 24px;background:#0d6efd;color:#fff;text-decoration:none;border-radius:6px}
+    h2{color:#1a1a2e}p{color:#444;line-height:1.6}</style></head>
+    <body><div class="box"><h2>' . APP_NAME . '</h2><h3>' . $title . '</h3>' . $body .
+    '<p style="margin-top:32px;font-size:12px;color:#999">&copy; ' . date('Y') . ' ' . APP_NAME . '</p>
+    </div></body></html>';
+}
+
+// Safe int/string from request
+function req_int(string $key, int $default = 0): int {
+    return isset($_REQUEST[$key]) ? (int)$_REQUEST[$key] : $default;
+}
+
+function req_str(string $key, string $default = ''): string {
+    return isset($_REQUEST[$key]) ? trim($_REQUEST[$key]) : $default;
+}
+
+// Get total stock for an item across all locations
+function get_item_stock(int $item_id): int {
+    $db = getDB();
+    $st = $db->prepare('SELECT COALESCE(SUM(quantity),0) FROM stock WHERE item_id=?');
+    $st->bind_param('i', $item_id);
+    $st->execute();
+    $st->bind_result($qty);
+    $st->fetch();
+    $st->close();
+    return (int)$qty;
+}
+
+// Update stock (upsert)
+function update_stock(int $item_id, int $location_id, int $delta): bool {
+    $db = getDB();
+    $st = $db->prepare('INSERT INTO stock (item_id, location_id, quantity)
+        VALUES (?,?,?) ON DUPLICATE KEY UPDATE quantity = quantity + ?');
+    $st->bind_param('iiii', $item_id, $location_id, $delta, $delta);
+    $result = $st->execute();
+    $st->close();
+    return $result;
+}
+
+// Log mutation
+function log_mutation(int $item_id, int $location_id, string $type, int $qty,
+    string $ref_no, string $ref_type, int $ref_id, int $user_id, string $notes = ''): void {
+    $db = getDB();
+    $st = $db->prepare('INSERT INTO mutations
+        (item_id,location_id,type,quantity,reference_no,reference_type,reference_id,user_id,notes)
+        VALUES (?,?,?,?,?,?,?,?,?)');
+    $st->bind_param('iisissiis', $item_id, $location_id, $type, $qty,
+        $ref_no, $ref_type, $ref_id, $user_id, $notes);
+    $st->execute();
+    $st->close();
+}

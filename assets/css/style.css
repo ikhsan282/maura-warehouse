@@ -1,0 +1,115 @@
+/* Maura Warehouse – main stylesheet */
+:root {
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 60px;
+  --sidebar-bg: #1a1d23;
+  --sidebar-hover: rgba(255,255,255,.07);
+  --sidebar-active: rgba(13,110,253,.25);
+  --sidebar-border: rgba(255,255,255,.08);
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.wrapper { min-height: 100vh; }
+
+#sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  transition: width .25s ease;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#sidebar.collapsed { width: var(--sidebar-collapsed); }
+#sidebar.collapsed .sidebar-label { display: none; }
+#sidebar.collapsed .sidebar-section-title { display: none; }
+#sidebar.collapsed .sidebar-link { justify-content: center; padding: .55rem 0; }
+#sidebar.collapsed .sidebar-header span { display: none; }
+
+.main-content { min-width: 0; }
+.content-area { min-height: calc(100vh - 57px); }
+
+/* ── Sidebar links ──────────────────────────────────────── */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .5rem 1rem;
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-size: .875rem;
+  border-radius: 0;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.sidebar-link:hover { background: var(--sidebar-hover); color: #fff; }
+.sidebar-link.active { background: var(--sidebar-active); color: #fff; font-weight: 600; }
+.sidebar-link i { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
+
+.sidebar-section-title {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.35);
+  padding: 1rem 1rem .3rem;
+  text-transform: uppercase;
+}
+
+.sidebar-footer .sidebar-link { font-size: .8rem; }
+
+/* ── Cards ──────────────────────────────────────────────── */
+.stat-card {
+  border: none;
+  border-radius: .75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  transition: transform .15s, box-shadow .15s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.stat-card .icon-box {
+  width: 52px; height: 52px;
+  border-radius: .6rem;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+.table-card { border-radius: .75rem; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+.table thead th { font-size: .75rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: #f8f9fa; }
+.table tbody tr:hover { background: #f0f4ff; }
+.table td, .table th { vertical-align: middle; }
+
+/* ── Auth pages ─────────────────────────────────────────── */
+.auth-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1d23 0%, #0d6efd22 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth-card {
+  width: 100%; max-width: 420px;
+  background: #fff; border-radius: 1rem;
+  box-shadow: 0 8px 40px rgba(0,0,0,.18);
+  padding: 2.5rem 2rem;
+}
+.auth-logo { font-size: 1.6rem; font-weight: 800; color: #0d6efd; }
+.auth-logo i { font-size: 2rem; }
+
+/* ── Badges / status ────────────────────────────────────── */
+.badge-low  { background: #fff3cd; color: #856404; }
+.badge-ok   { background: #d1e7dd; color: #0a3622; }
+.badge-zero { background: #f8d7da; color: #58151c; }
+
+/* ── Misc ───────────────────────────────────────────────── */
+.page-header { margin-bottom: 1.5rem; }
+.page-header h4 { font-weight: 700; margin: 0; }
+.btn-action { padding: .25rem .55rem; font-size: .8rem; }
+.required::after { content: ' *'; color: #dc3545; }
+
+@media (max-width: 991.98px) {
+  #sidebar { position: fixed; z-index: 1050; transform: translateX(-100%); transition: transform .25s; }
+  #sidebar.mobile-open { transform: translateX(0); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1049; }
+  .sidebar-overlay.show { display: block; }
+}
