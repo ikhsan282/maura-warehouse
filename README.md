@@ -97,29 +97,58 @@ maura-warehouse/
 | Viewer | Read-only semua |
 
 ## Fitur
-- ✅ Login / Logout dengan session
-- ✅ CSRF protection di semua form
-- ✅ Email verifikasi via `mail()`
-- ✅ Forgot & reset password (token 1 jam)
-- ✅ RBAC: roles + permissions + role_permissions
-- ✅ Master data: kategori, satuan, supplier, lokasi
-- ✅ Data barang dengan stok minimum & harga
-- ✅ Barang masuk (dari supplier, ke lokasi)
-- ✅ Barang keluar (dari lokasi, ke penerima)
-- ✅ Transfer antar lokasi
-- ✅ Stok per lokasi + alert menipis
-- ✅ Audit trail (mutations log)
-- ✅ Laporan mutasi + export CSV
-- ✅ Laporan stok + export CSV
-- ✅ Laporan barang masuk & keluar
-- ✅ Dashboard dengan statistik real-time
-- ✅ Pagination di semua list
-- ✅ Responsive (Bootstrap 5)
+
+### Dashboard
+- Statistik real-time: total barang aktif, jumlah item stok menipis, nilai total inventori (qty × harga beli), jumlah transaksi masuk+keluar hari ini
+- Tabel 10 item dengan stok ≤ stok minimum (badge merah jika nol, kuning jika menipis)
+- Tabel 8 mutasi terbaru: waktu, barang, tipe (masuk/keluar/transfer), lokasi, qty
+- Ringkasan hari ini: transaksi masuk & transaksi keluar (shortcut ke masing-masing halaman)
+
+### Master Data
+- **Barang** — CRUD lengkap; kode, nama, kategori, satuan, harga beli, stok minimum, status aktif; halaman view menampilkan stok per lokasi
+- **Kategori** — CRUD via modal; nama & deskripsi
+- **Satuan** — CRUD via modal; nama & singkatan
+- **Supplier** — CRUD via modal; kode, nama, kontak
+- **Lokasi** — CRUD via modal; kode & nama lokasi gudang
+
+### Barang Masuk (`stock-in`)
+- Input multi-baris barang dalam satu transaksi (dynamic rows JavaScript)
+- Field: tanggal, supplier, lokasi tujuan, catatan, + daftar barang (item, qty, harga beli)
+- Nomor referensi di-generate otomatis (`SI-...`)
+- Stok lokasi diperbarui dan mutasi dicatat otomatis setiap baris
+- Transaksi dibungkus dalam DB transaction — rollback jika ada error
+
+### Barang Keluar (`stock-out`)
+- Sama seperti barang masuk; stok dikurangi dari lokasi asal
+- Nomor referensi `SO-...`
+
+### Transfer Antar Lokasi
+- Pindah stok dari satu lokasi ke lokasi lain
+- Mencatat dua mutasi sekaligus: `transfer_out` di sumber, `transfer_in` di tujuan
+- Nomor referensi `TR-...`
+
+### Cek Stok
+- Tabel stok per item per lokasi
+- Alert visual untuk item di bawah stok minimum
+
+### Laporan
+- **Mutasi Barang** — filter: rentang tanggal, barang, tipe (masuk/keluar/transfer masuk/transfer keluar); tabel: waktu, kode, nama, tipe, lokasi, qty, referensi, oleh; export CSV (UTF-8 BOM untuk Excel)
+- **Stok** — snapshot stok saat ini per item & lokasi; export CSV
+- **Barang Masuk** — riwayat transaksi masuk dengan filter tanggal & supplier
+- **Barang Keluar** — riwayat transaksi keluar dengan filter tanggal & lokasi
+
+### Manajemen User & Role
+- CRUD user; nama, username, email, peran
+- Permission editor per role: centang/uncentang permission individual
+- Toggle aktif/nonaktif; reset password oleh Super Admin
 
 ## Keamanan
 - Semua query pakai MySQLi prepared statements
 - Password di-hash dengan `password_hash()` bcrypt cost=12
 - CSRF token di setiap form POST
+- Output di-escape dengan `htmlspecialchars()`
 - Session `httponly` + `samesite=Strict`
 - `.htaccess` blokir akses langsung ke `config/`, `includes/`, `database/`
 - Validasi permission di setiap halaman (`require_perm()`)
+- Email verifikasi akun via `mail()`
+- Forgot & reset password dengan token berumur 1 jam
