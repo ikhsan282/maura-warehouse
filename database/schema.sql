@@ -309,6 +309,23 @@ INSERT INTO `units` (`name`, `abbreviation`) VALUES
 ('Lusin', 'lsn'),
 ('Roll', 'rol');
 
+-- ── Indexes ──────────────────────────────────────────────────────────────────
+ALTER TABLE `mutations`
+  ADD INDEX `idx_mutations_item_id`    (`item_id`),
+  ADD INDEX `idx_mutations_location_id`(`location_id`),
+  ADD INDEX `idx_mutations_type`       (`type`),
+  ADD INDEX `idx_mutations_created_at` (`created_at`);
+
+ALTER TABLE `stock_in`
+  ADD INDEX `idx_stock_in_transaction_date` (`transaction_date`);
+
+ALTER TABLE `stock_out`
+  ADD INDEX `idx_stock_out_transaction_date` (`transaction_date`);
+
+ALTER TABLE `items`
+  ADD INDEX `idx_items_code` (`code`),
+  ADD INDEX `idx_items_name` (`name`);
+
 -- Seed: locations
 INSERT INTO `locations` (`code`, `name`, `description`) VALUES
 ('RAK-A1', 'Rak A1', 'Rak utama bagian depan'),
