@@ -65,8 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && req_str('action') === 'approve') {
     redirect(APP_URL . '/pages/adjustments/view.php?id=' . $id);
 }
 
-$can_approve = can('adjustments.approve') && $adj['status'] === 'draft' && $adj['user_id'] !== current_user()['id'];
-
 $page_title = 'Detail Stok Opname';
 include __DIR__ . '/../../includes/header.php';
 ?>
