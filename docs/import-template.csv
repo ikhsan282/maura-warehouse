@@ -1,0 +1,4 @@
+Kode,Nama,Kategori,Satuan,Stok Minimum,Harga Beli,Harga Jual,Deskripsi
+BRG001,Contoh Barang 1,ELC,Pcs,10,50000,75000,Barang elektronik contoh
+BRG002,Contoh Barang 2,FRN,Unit,5,1200000,1500000,Furniture kantor
+BRG003,Contoh Barang 3,STN,Pack,20,15000,25000,Alat tulis kantor
