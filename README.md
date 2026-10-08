@@ -161,3 +161,4 @@ maura-warehouse/
 - **HTTPS Wajib** untuk fitur barcode scanner — browser modern blokir akses kamera di HTTP plain
 - Development localhost (XAMPP/WAMP) aman tanpa HTTPS
 - Production di cPanel: aktifkan SSL/Let's Encrypt gratis melalui cPanel SSL/TLS menu
+- Library `html5-qrcode` (MIT license) di-serve lokal dari `assets/vendor/` — tidak ada dependency CDN pihak ketiga untuk scanner, jalan penuh di shared hosting & XAMPP
