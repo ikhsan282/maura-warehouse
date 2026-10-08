@@ -31,7 +31,7 @@ $page_title='Detail Barang Keluar'; include __DIR__.'/../../includes/header.php'
   <div class="d-flex align-items-center justify-content-between">
     <h4><i class="bi bi-box-arrow-up me-2 text-primary"></i>Detail Barang Keluar</h4>
     <div class="d-flex gap-2">
-      <button onclick="window.print()" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
+      <a href="<?=APP_URL?>/pages/stock-out/print.php?id=<?=$header['id']?>" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</a>
       <?php if(can('stock_out.delete')):?>
       <form method="POST" action="<?=APP_URL?>/pages/stock-out/delete.php" class="d-inline">
         <?=csrf_field()?><input type="hidden" name="id" value="<?=$header['id']?>">

@@ -14,6 +14,10 @@ define('SESSION_LIFETIME', 7200); // 2 hours
 // Pagination
 define('PER_PAGE', 20);
 
+// Company identity (used on printed documents)
+define('COMPANY_NAME', 'Maura Warehouse');
+define('COMPANY_ADDRESS', 'Jl. Contoh No. 123, Jakarta'); // change for production
+
 date_default_timezone_set(APP_TIMEZONE);
 
 // Start session once

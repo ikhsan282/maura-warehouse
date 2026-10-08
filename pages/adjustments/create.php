@@ -64,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $st2 = $db->prepare('INSERT INTO stock_adjustment_details (adjustment_id,item_id,system_qty,physical_qty,difference,reason) VALUES (?,?,?,?,?,?)');
             foreach ($valid_items as [$iid, $sys, $phy, $rsn]) {
                 $diff = $phy - $sys;
-                if ($diff == 0 && $rsn === '') continue; // skip rows with no diff & no reason
                 $st2->bind_param('iiiiis', $adj_id, $iid, $sys, $phy, $diff, $rsn);
                 $st2->execute();
             }
