@@ -135,12 +135,17 @@ $page_title='Transfer Lokasi'; include __DIR__.'/../../includes/header.php';
           <tbody id="itemsBody">
             <tr>
               <td>
-                <select name="item_id[0]" class="form-select form-select-sm" required>
-                  <option value="">— Pilih —</option>
-                  <?php foreach($items as $it):?>
-                  <option value="<?=$it['id']?>">[<?=htmlspecialchars($it['code'])?>] <?=htmlspecialchars($it['name'])?> (<?=htmlspecialchars($it['abbreviation'])?>)</option>
-                  <?php endforeach;?>
-                </select>
+                <div class="input-group input-group-sm">
+                  <select name="item_id[0]" class="form-select form-select-sm item-select" required>
+                    <option value="">— Pilih —</option>
+                    <?php foreach($items as $it):?>
+                    <option value="<?=$it['id']?>" data-code="<?=htmlspecialchars($it['code'])?>">[<?=htmlspecialchars($it['code'])?>] <?=htmlspecialchars($it['name'])?> (<?=htmlspecialchars($it['abbreviation'])?>)</option>
+                    <?php endforeach;?>
+                  </select>
+                  <button type="button" class="btn btn-outline-secondary scan-btn" title="Scan Barcode/QR">
+                    <i class="bi bi-upc-scan"></i>
+                  </button>
+                </div>
               </td>
               <td><input type="number" name="quantity[0]" class="form-control form-control-sm item-qty" min="1" value="1" required></td>
               <td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="bi bi-trash"></i></button></td>
@@ -156,4 +161,5 @@ $page_title='Transfer Lokasi'; include __DIR__.'/../../includes/header.php';
   <a href="<?=APP_URL?>/pages/transfers/index.php" class="btn btn-outline-secondary">Batal</a>
 </div>
 </form>
+<?php include __DIR__.'/../../includes/scanner-modal.php';?>
 <?php include __DIR__.'/../../includes/footer.php';?>

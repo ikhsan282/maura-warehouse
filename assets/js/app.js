@@ -94,18 +94,73 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.textContent = 'Rp ' + total.toLocaleString('id-ID');
   }
 
-  // ── Datepicker default today ──────────────────────────────
-  document.querySelectorAll('input[type=date]:not([value])').forEach(el => {
-    if (!el.value) el.value = new Date().toISOString().split('T')[0];
+  // ── Barcode / QR scanner ──────────────────────────────────
+  const scannerModalEl = document.getElementById('scannerModal');
+  const scannerReader  = document.getElementById('scanner-reader');
+  let scanner = null;
+  let scanTarget = null;
+  let scannerRunning = false;
+
+  document.addEventListener('click', e => {
+    const scanButton = e.target.closest('.scan-btn');
+    if (!scanButton || !scannerModalEl) return;
+
+    scanTarget = scanButton.closest('td')?.querySelector('.item-select');
+    if (!scanTarget) return;
+    bootstrap.Modal.getOrCreateInstance(scannerModalEl).show();
   });
 
-  // ── Search filter (client-side table) ────────────────────
-  const searchInput = document.getElementById('tableSearch');
-  searchInput?.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase();
-    document.querySelectorAll('table tbody tr').forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  scannerModalEl?.addEventListener('shown.bs.modal', () => {
+    if (!scannerReader || scannerRunning) return;
+    if (!window.Html5Qrcode) {
+      scannerReader.innerHTML = '<div class="alert alert-danger">Scanner gagal dimuat. Gunakan input manual.</div>';
+      return;
+    }
+
+    scanner = new Html5Qrcode('scanner-reader');
+    scannerRunning = true;
+    scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      decodedText => {
+        const code = decodedText.trim().toLowerCase();
+        const option = [...(scanTarget?.options || [])].find(opt =>
+          (opt.dataset.code || '').trim().toLowerCase() === code
+        );
+
+        if (!option) {
+          scannerReader.querySelector('.scan-not-found')?.remove();
+          const message = document.createElement('div');
+          message.className = 'alert alert-warning scan-not-found mt-2 mb-0';
+          message.textContent = `Kode "${decodedText}" tidak ditemukan di master barang.`;
+          scannerReader.appendChild(message);
+          return;
+        }
+
+        scanTarget.value = option.value;
+        scanTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        stopScanner(true);
+      },
+      () => {}
+    ).catch(() => {
+      scannerReader.innerHTML = '<div class="alert alert-danger">Kamera tidak dapat diakses. Pastikan izin kamera diberikan dan halaman memakai HTTPS.</div>';
+      scannerRunning = false;
+      scanner = null;
     });
   });
+
+  scannerModalEl?.addEventListener('hidden.bs.modal', () => stopScanner(false));
+
+  function stopScanner(hideModal) {
+    const activeScanner = scanner;
+    scanner = null;
+    scannerRunning = false;
+    if (activeScanner) {
+      activeScanner.stop().catch(() => {}).finally(() => activeScanner.clear());
+    }
+    if (hideModal && scannerModalEl) {
+      bootstrap.Modal.getOrCreateInstance(scannerModalEl).hide();
+    }
+  }
 
 });

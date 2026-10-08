@@ -113,6 +113,7 @@ maura-warehouse/
 
 ### Barang Masuk (`stock-in`)
 - Input multi-baris barang dalam satu transaksi (dynamic rows JavaScript)
+- **Barcode/QR Scanner** — tombol 📷 scan untuk input barang via kamera (HTML5)
 - Field: tanggal, supplier, lokasi tujuan, catatan, + daftar barang (item, qty, harga beli)
 - Nomor referensi di-generate otomatis (`SI-...`)
 - Stok lokasi diperbarui dan mutasi dicatat otomatis setiap baris
@@ -120,10 +121,12 @@ maura-warehouse/
 
 ### Barang Keluar (`stock-out`)
 - Sama seperti barang masuk; stok dikurangi dari lokasi asal
+- **Barcode/QR Scanner** untuk input barang cepat
 - Nomor referensi `SO-...`
 
 ### Transfer Antar Lokasi
 - Pindah stok dari satu lokasi ke lokasi lain
+- **Barcode/QR Scanner** untuk input barang
 - Mencatat dua mutasi sekaligus: `transfer_out` di sumber, `transfer_in` di tujuan
 - Nomor referensi `TR-...`
 
@@ -152,3 +155,9 @@ maura-warehouse/
 - Validasi permission di setiap halaman (`require_perm()`)
 - Email verifikasi akun via `mail()`
 - Forgot & reset password dengan token berumur 1 jam
+
+## Catatan Deployment
+
+- **HTTPS Wajib** untuk fitur barcode scanner — browser modern blokir akses kamera di HTTP plain
+- Development localhost (XAMPP/WAMP) aman tanpa HTTPS
+- Production di cPanel: aktifkan SSL/Let's Encrypt gratis melalui cPanel SSL/TLS menu
