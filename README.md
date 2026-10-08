@@ -132,6 +132,14 @@ maura-warehouse/
 - Mencatat dua mutasi sekaligus: `transfer_out` di sumber, `transfer_in` di tujuan
 - Nomor referensi `TR-...`
 
+### Stok Opname (Penyesuaian)
+- Hitung fisik vs stok sistem per lokasi
+- Draft dokumen dengan selisih otomatis dan alasan wajib
+- **Approval workflow** — pembuat tidak dapat menyetujui dokumennya sendiri
+- Stok sistem baru berubah setelah approval
+- **Barcode/QR Scanner** untuk input barang
+- Mutation log untuk audit trail
+
 ### Cek Stok
 - Tabel stok per item per lokasi
 - Alert visual untuk item di bawah stok minimum
