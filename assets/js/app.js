@@ -78,6 +78,25 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', removeRow);
   });
 
+  // ── Adjustment difference calculation ─────────────────────
+  document.addEventListener('input', e => {
+    if (e.target.matches('.phy-qty')) {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const sys = parseFloat(row.querySelector('.sys-qty')?.value) || 0;
+      const phy = parseFloat(e.target.value) || 0;
+      const diff = phy - sys;
+      const diffEl = row.querySelector('.diff-display');
+      if (diffEl) {
+        diffEl.value = diff;
+        diffEl.classList.remove('text-danger', 'text-success', 'text-muted');
+        if (diff > 0) diffEl.classList.add('text-success', 'fw-bold');
+        else if (diff < 0) diffEl.classList.add('text-danger', 'fw-bold');
+        else diffEl.classList.add('text-muted');
+      }
+    }
+  });
+
   // ── Live stock total calculation ─────────────────────────
   document.addEventListener('input', e => {
     if (e.target.matches('.item-qty, .item-price')) calcTotal();

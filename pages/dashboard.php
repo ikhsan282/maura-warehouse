@@ -161,7 +161,7 @@ include __DIR__ . '/../../includes/header.php';
           <thead><tr><th>Waktu</th><th>Barang</th><th>Tipe</th><th class="text-end">Qty</th></tr></thead>
           <tbody>
           <?php foreach ($recent as $r):
-            $type_map = ['in'=>['Masuk','success'],'out'=>['Keluar','danger'],'transfer_in'=>['T.Masuk','info'],'transfer_out'=>['T.Keluar','warning']];
+            $type_map = ['in'=>['Masuk','success'],'out'=>['Keluar','danger'],'transfer_in'=>['T.Masuk','info'],'transfer_out'=>['T.Keluar','warning'],'adjustment'=>['Opname','primary']];
             [$label,$color] = $type_map[$r['type']] ?? ['?','secondary'];
           ?>
             <tr>

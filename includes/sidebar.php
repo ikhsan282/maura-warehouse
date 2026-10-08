@@ -54,7 +54,7 @@ function nav_active(string $path): string {
     </a>
     <?php endif; ?>
 
-    <?php if (can('stock_in.view') || can('stock_out.view') || can('transfers.view')): ?>
+    <?php if (can('stock_in.view') || can('stock_out.view') || can('transfers.view') || can('adjustments.view')): ?>
     <div class="sidebar-section-title sidebar-label">TRANSAKSI</div>
     <?php endif; ?>
 
@@ -73,6 +73,12 @@ function nav_active(string $path): string {
     <?php if (can('transfers.view')): ?>
     <a href="<?= APP_URL ?>/pages/transfers/index.php" class="sidebar-link <?= nav_active('/transfers') ?>">
       <i class="bi bi-arrow-left-right"></i><span class="sidebar-label">Transfer Lokasi</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('adjustments.view')): ?>
+    <a href="<?= APP_URL ?>/pages/adjustments/index.php" class="sidebar-link <?= nav_active('/adjustments') ?>">
+      <i class="bi bi-clipboard-check"></i><span class="sidebar-label">Stok Opname</span>
     </a>
     <?php endif; ?>
 

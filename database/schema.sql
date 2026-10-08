@@ -195,15 +195,45 @@ CREATE TABLE `transfer_details` (
   FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
 ) ENGINE=InnoDB;
 
+-- Stock Adjustments
+CREATE TABLE `stock_adjustments` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `reference_no` VARCHAR(50) NOT NULL UNIQUE,
+  `location_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `approved_by` INT UNSIGNED NULL,
+  `approved_at` TIMESTAMP NULL,
+  `status` ENUM('draft','approved') DEFAULT 'draft',
+  `notes` TEXT,
+  `transaction_date` DATE NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB;
+
+-- Stock Adjustment Details
+CREATE TABLE `stock_adjustment_details` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `adjustment_id` INT UNSIGNED NOT NULL,
+  `item_id` INT UNSIGNED NOT NULL,
+  `system_qty` INT NOT NULL,
+  `physical_qty` INT NOT NULL,
+  `difference` INT NOT NULL,
+  `reason` VARCHAR(255),
+  FOREIGN KEY (`adjustment_id`) REFERENCES `stock_adjustments`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
+) ENGINE=InnoDB;
+
 -- Mutation Log (audit trail)
 CREATE TABLE `mutations` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `item_id` INT UNSIGNED NOT NULL,
   `location_id` INT UNSIGNED NOT NULL,
-  `type` ENUM('in','out','transfer_in','transfer_out') NOT NULL,
+  `type` ENUM('in','out','transfer_in','transfer_out','adjustment') NOT NULL,
   `quantity` INT NOT NULL,
   `reference_no` VARCHAR(50),
-  `reference_type` ENUM('stock_in','stock_out','transfer') NOT NULL,
+  `reference_type` ENUM('stock_in','stock_out','transfer','adjustment') NOT NULL,
   `reference_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
   `notes` TEXT,
@@ -260,6 +290,9 @@ INSERT INTO `permissions` (`name`, `description`) VALUES
 ('transfers.view', 'Lihat transfer'),
 ('transfers.create', 'Input transfer'),
 ('transfers.delete', 'Hapus transfer'),
+('adjustments.view', 'Lihat penyesuaian stok'),
+('adjustments.create', 'Buat penyesuaian stok'),
+('adjustments.approve', 'Approve penyesuaian stok'),
 ('stock.view', 'Lihat stok'),
 ('reports.view', 'Lihat laporan');
 
@@ -276,14 +309,14 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 3, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
   'items.view','stock_in.view','stock_in.create','stock_out.view','stock_out.create',
-  'transfers.view','transfers.create','stock.view','reports.view'
+  'transfers.view','transfers.create','adjustments.view','adjustments.create','stock.view','reports.view'
 );
 
 -- Viewer
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 4, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
-  'items.view','stock_in.view','stock_out.view','transfers.view','stock.view','reports.view'
+  'items.view','stock_in.view','stock_out.view','transfers.view','adjustments.view','stock.view','reports.view'
 );
 
 -- Default Super Admin user (password: Admin@123)

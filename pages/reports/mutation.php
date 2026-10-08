@@ -61,6 +61,7 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
         <option value="out" <?=$type_filter=='out'?'selected':''?>>Keluar</option>
         <option value="transfer_in" <?=$type_filter=='transfer_in'?'selected':''?>>Transfer Masuk</option>
         <option value="transfer_out" <?=$type_filter=='transfer_out'?'selected':''?>>Transfer Keluar</option>
+        <option value="adjustment" <?=$type_filter=='adjustment'?'selected':''?>>Penyesuaian</option>
       </select>
       <button class="btn btn-sm btn-outline-secondary">Filter</button>
       <a href="?" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></a>
@@ -73,7 +74,7 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
       <?php if(empty($rows)): ?>
         <tr><td colspan="8" class="text-center text-muted py-4">Tidak ada data</td></tr>
       <?php else:
-        $type_map=['in'=>['Masuk','success'],'out'=>['Keluar','danger'],'transfer_in'=>['T.Masuk','info'],'transfer_out'=>['T.Keluar','warning']];
+        $type_map=['in'=>['Masuk','success'],'out'=>['Keluar','danger'],'transfer_in'=>['T.Masuk','info'],'transfer_out'=>['T.Keluar','warning'],'adjustment'=>['Opname','primary']];
         foreach($rows as $r): [$lbl,$col]=$type_map[$r['type']]??['?','secondary']; ?>
         <tr>
           <td class="small text-muted"><?=date('d/m/y H:i',strtotime($r['created_at']))?></td>
