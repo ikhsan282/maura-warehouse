@@ -70,17 +70,24 @@ include __DIR__ . '/../../includes/header.php';
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
-        <tr><th>#</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th>
+        <tr><th>#</th><th>Foto</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th>
         <th class="text-end">Stok</th><th class="text-end">Harga Beli</th><th class="text-end">Harga Jual</th><th class="text-center">Aksi</th></tr>
       </thead>
       <tbody>
       <?php if (empty($rows)): ?>
-        <tr><td colspan="9" class="text-center text-muted py-4">Tidak ada data</td></tr>
+        <tr><td colspan="10" class="text-center text-muted py-4">Tidak ada data</td></tr>
       <?php else: foreach ($rows as $i => $r):
         $stock_class = $r['total_stock'] == 0 ? 'badge-zero' : ($r['total_stock'] <= $r['min_stock'] ? 'badge-low' : 'badge-ok');
       ?>
         <tr>
           <td class="small text-muted"><?= $pag['offset']+$i+1 ?></td>
+          <td>
+            <?php if (!empty($r['image'])): ?>
+              <img src="<?= APP_URL ?>/<?= htmlspecialchars($r['image']) ?>" alt="" class="rounded border" style="width:44px;height:44px;object-fit:cover">
+            <?php else: ?>
+              <span class="d-inline-flex align-items-center justify-content-center bg-light border rounded text-muted" style="width:44px;height:44px"><i class="bi bi-image"></i></span>
+            <?php endif; ?>
+          </td>
           <td><code class="small"><?= htmlspecialchars($r['code']) ?></code></td>
           <td class="fw-semibold"><?= htmlspecialchars($r['name']) ?></td>
           <td class="small"><?= htmlspecialchars($r['cat_name']) ?></td>

@@ -37,6 +37,24 @@ $recent = $db->query('SELECT m.created_at, m.type, m.quantity, i.name AS item_na
     JOIN locations l ON l.id=m.location_id
     ORDER BY m.id DESC LIMIT 8')->fetch_all(MYSQLI_ASSOC);
 
+// Chart data: last 7 days transactions
+$chart_days = [];
+$chart_in = [];
+$chart_out = [];
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $chart_days[] = date('d M', strtotime($date));
+    $in_count = $db->query("SELECT COUNT(*) FROM stock_in WHERE transaction_date='$date'")->fetch_row()[0];
+    $out_count = $db->query("SELECT COUNT(*) FROM stock_out WHERE transaction_date='$date'")->fetch_row()[0];
+    $chart_in[] = (int)$in_count;
+    $chart_out[] = (int)$out_count;
+}
+
+// Top items by stock value
+$top_items = $db->query('SELECT i.name, COALESCE(SUM(s.quantity * i.buy_price),0) AS value
+    FROM items i LEFT JOIN stock s ON s.item_id=i.id
+    WHERE i.is_active=1 GROUP BY i.id ORDER BY value DESC LIMIT 5')->fetch_all(MYSQLI_ASSOC);
+
 $page_title = 'Dashboard';
 include __DIR__ . '/../../includes/header.php';
 ?>
@@ -161,6 +179,30 @@ include __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
+<!-- Charts row -->
+<div class="row g-3 mt-1">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold py-2">
+        <i class="bi bi-bar-chart-line me-2"></i>Transaksi 7 Hari Terakhir
+      </div>
+      <div class="card-body">
+        <canvas id="transactionChart" height="80"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold py-2">
+        <i class="bi bi-pie-chart me-2"></i>Top 5 Nilai Inventori
+      </div>
+      <div class="card-body">
+        <canvas id="valueChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Today summary -->
 <div class="row g-3 mt-1">
   <div class="col-md-6">
@@ -183,4 +225,59 @@ include __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Transaction chart
+new Chart(document.getElementById('transactionChart'), {
+  type: 'line',
+  data: {
+    labels: <?= json_encode($chart_days) ?>,
+    datasets: [{
+      label: 'Masuk',
+      data: <?= json_encode($chart_in) ?>,
+      borderColor: '#198754',
+      backgroundColor: 'rgba(25,135,84,0.1)',
+      tension: 0.3,
+      fill: true
+    }, {
+      label: 'Keluar',
+      data: <?= json_encode($chart_out) ?>,
+      borderColor: '#dc3545',
+      backgroundColor: 'rgba(220,53,69,0.1)',
+      tension: 0.3,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { position: 'top' } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+
+// Value pie chart
+new Chart(document.getElementById('valueChart'), {
+  type: 'doughnut',
+  data: {
+    labels: <?= json_encode(array_column($top_items, 'name')) ?>,
+    datasets: [{
+      data: <?= json_encode(array_column($top_items, 'value')) ?>,
+      backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6c757d']
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.label + ': Rp ' + ctx.parsed.toLocaleString('id-ID')
+        }
+      }
+    }
+  }
+});
+</script>
 <?php include __DIR__ . '/../../includes/footer.php'; ?>

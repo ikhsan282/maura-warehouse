@@ -100,12 +100,14 @@ maura-warehouse/
 
 ### Dashboard
 - Statistik real-time: total barang aktif, jumlah item stok menipis, nilai total inventori (qty × harga beli), jumlah transaksi masuk+keluar hari ini
+- **Grafik transaksi 7 hari terakhir** (Chart.js) — tren barang masuk vs keluar
+- **Top 5 nilai inventori** — doughnut chart barang dengan nilai stok terbesar
 - Tabel 10 item dengan stok ≤ stok minimum (badge merah jika nol, kuning jika menipis)
 - Tabel 8 mutasi terbaru: waktu, barang, tipe (masuk/keluar/transfer), lokasi, qty
 - Ringkasan hari ini: transaksi masuk & transaksi keluar (shortcut ke masing-masing halaman)
 
 ### Master Data
-- **Barang** — CRUD lengkap; kode, nama, kategori, satuan, harga beli, stok minimum, status aktif; halaman view menampilkan stok per lokasi
+- **Barang** — CRUD lengkap; kode, nama, kategori, satuan, harga beli, stok minimum, status aktif; **foto barang** JPG/PNG/WebP maks 2MB (tampil di list & detail); halaman view menampilkan stok per lokasi
 - **Kategori** — CRUD via modal; nama & deskripsi
 - **Satuan** — CRUD via modal; nama & singkatan
 - **Supplier** — CRUD via modal; kode, nama, kontak

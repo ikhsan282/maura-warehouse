@@ -49,6 +49,12 @@ include __DIR__ . '/../../includes/header.php';
     <div class="card shadow-sm">
       <div class="card-header bg-white fw-semibold"><i class="bi bi-info-circle me-2"></i>Informasi Barang</div>
       <div class="card-body">
+        <?php if (!empty($item['image'])): ?>
+          <div class="text-center mb-3">
+            <img src="<?= APP_URL ?>/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>"
+                 class="img-fluid rounded border" style="max-height:260px;object-fit:contain">
+          </div>
+        <?php endif; ?>
         <table class="table table-sm table-borderless mb-0">
           <tr><td class="text-muted small" style="width:40%">Kode</td><td><code><?= htmlspecialchars($item['code']) ?></code></td></tr>
           <tr><td class="text-muted small">Nama</td><td class="fw-semibold"><?= htmlspecialchars($item['name']) ?></td></tr>

@@ -99,6 +99,7 @@ CREATE TABLE `items` (
   `buy_price` DECIMAL(15,2) DEFAULT 0,
   `sell_price` DECIMAL(15,2) DEFAULT 0,
   `description` TEXT,
+  `image` VARCHAR(255) DEFAULT NULL,
   `is_active` TINYINT(1) DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`),

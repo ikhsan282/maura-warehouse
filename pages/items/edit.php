@@ -24,14 +24,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sell_price= (float)req_str('sell_price');
     $desc      = req_str('description');
     $active    = req_int('is_active');
+    $remove_img= req_int('remove_image');
+    $image     = $item['image'] ?? null;
 
     if (!$code) $errors[] = 'Kode barang wajib diisi.';
     if (!$name) $errors[] = 'Nama barang wajib diisi.';
 
     if (empty($errors)) {
+        try {
+            if ($remove_img && empty($_FILES['image']['tmp_name'])) {
+                delete_item_image($image);
+                $image = null;
+            } else {
+                $image = upload_item_image($_FILES['image'] ?? [], $image);
+            }
+        } catch (RuntimeException $e) {
+            $errors[] = $e->getMessage();
+        }
+    }
+
+    if (empty($errors)) {
         $st = $db->prepare('UPDATE items SET code=?,name=?,category_id=?,unit_id=?,min_stock=?,
-            buy_price=?,sell_price=?,description=?,is_active=? WHERE id=?');
-        $st->bind_param('ssiiiddsii', $code,$name,$cat_id,$unit_id,$min_stock,$buy_price,$sell_price,$desc,$active,$id);
+            buy_price=?,sell_price=?,description=?,image=?,is_active=? WHERE id=?');
+        $st->bind_param('ssiiiddssii', $code,$name,$cat_id,$unit_id,$min_stock,$buy_price,$sell_price,$desc,$image,$active,$id);
         if ($st->execute()) {
             set_flash('success', 'Barang berhasil diperbarui.');
             redirect(APP_URL . '/pages/items/index.php');
@@ -42,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     // repopulate
     $item = array_merge($item, ['code'=>$code,'name'=>$name,'category_id'=>$cat_id,'unit_id'=>$unit_id,
-        'min_stock'=>$min_stock,'buy_price'=>$buy_price,'sell_price'=>$sell_price,'description'=>$desc,'is_active'=>$active]);
+        'min_stock'=>$min_stock,'buy_price'=>$buy_price,'sell_price'=>$sell_price,'description'=>$desc,'image'=>$image,'is_active'=>$active]);
 }
 
 $categories = $db->query('SELECT id,name FROM categories ORDER BY name')->fetch_all(MYSQLI_ASSOC);
@@ -68,7 +83,7 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card shadow-sm">
   <div class="card-body">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       <?= csrf_field() ?>
       <div class="row g-3">
         <div class="col-md-4">
@@ -115,6 +130,23 @@ include __DIR__ . '/../../includes/header.php';
             <option value="1" <?= $item['is_active']?'selected':'' ?>>Aktif</option>
             <option value="0" <?= !$item['is_active']?'selected':'' ?>>Nonaktif</option>
           </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label small fw-semibold">Foto Barang</label>
+          <?php if (!empty($item['image'])): ?>
+            <div class="mb-2">
+              <img src="<?= APP_URL ?>/<?= htmlspecialchars($item['image']) ?>" alt="Foto barang"
+                   class="img-thumbnail" style="max-height:120px">
+            </div>
+          <?php endif; ?>
+          <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/webp">
+          <?php if (!empty($item['image'])): ?>
+            <div class="form-check mt-1">
+              <input class="form-check-input" type="checkbox" name="remove_image" value="1" id="removeImg">
+              <label class="form-check-label small text-danger" for="removeImg">Hapus foto saat simpan</label>
+            </div>
+          <?php endif; ?>
+          <div class="form-text">JPG, PNG, atau WebP. Maksimal 2MB. Biarkan kosong jika tidak diubah.</div>
         </div>
         <div class="col-12">
           <label class="form-label small fw-semibold">Deskripsi</label>

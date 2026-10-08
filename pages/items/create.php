@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $buy_price = (float)req_str('buy_price');
     $sell_price= (float)req_str('sell_price');
     $desc      = req_str('description');
+    $image     = null;
 
     if (!$code)    $errors[] = 'Kode barang wajib diisi.';
     if (!$name)    $errors[] = 'Nama barang wajib diisi.';
@@ -24,9 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$unit_id) $errors[] = 'Satuan wajib dipilih.';
 
     if (empty($errors)) {
-        $st = $db->prepare('INSERT INTO items (code,name,category_id,unit_id,min_stock,buy_price,sell_price,description)
-            VALUES (?,?,?,?,?,?,?,?)');
-        $st->bind_param('ssiiidds', $code,$name,$cat_id,$unit_id,$min_stock,$buy_price,$sell_price,$desc);
+        try {
+            $image = upload_item_image($_FILES['image'] ?? []);
+        } catch (RuntimeException $e) {
+            $errors[] = $e->getMessage();
+        }
+    }
+
+    if (empty($errors)) {
+        $st = $db->prepare('INSERT INTO items (code,name,category_id,unit_id,min_stock,buy_price,sell_price,description,image)
+            VALUES (?,?,?,?,?,?,?,?,?)');
+        $st->bind_param('ssiiiddss', $code,$name,$cat_id,$unit_id,$min_stock,$buy_price,$sell_price,$desc,$image);
         if ($st->execute()) {
             set_flash('success', "Barang <strong>" . htmlspecialchars($name) . "</strong> berhasil ditambahkan.");
             redirect(APP_URL . '/pages/items/index.php');
@@ -60,7 +69,7 @@ include __DIR__ . '/../../includes/header.php';
 
 <div class="card shadow-sm">
   <div class="card-body">
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       <?= csrf_field() ?>
       <div class="row g-3">
         <div class="col-md-4">
@@ -107,6 +116,11 @@ include __DIR__ . '/../../includes/header.php';
           <label class="form-label small fw-semibold">Harga Jual (Rp)</label>
           <input type="number" name="sell_price" class="form-control" min="0" step="any"
             value="<?= req_str('sell_price') ?>">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-semibold">Foto Barang</label>
+          <input type="file" name="image" class="form-control" accept="image/jpeg,image/png,image/webp">
+          <div class="form-text">JPG, PNG, atau WebP. Maksimal 2MB.</div>
         </div>
         <div class="col-12">
           <label class="form-label small fw-semibold">Deskripsi</label>

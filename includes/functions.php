@@ -171,3 +171,39 @@ function log_mutation(int $item_id, int $location_id, string $type, int $qty,
     $st->execute();
     $st->close();
 }
+
+// Upload item image (JPG/PNG/WebP, max 2MB)
+function upload_item_image(array $file, ?string $old_image = null): ?string {
+    if (empty($file['tmp_name']) || $file['error'] === UPLOAD_ERR_NO_FILE) return $old_image;
+    if ($file['error'] !== UPLOAD_ERR_OK) throw new RuntimeException('Upload foto gagal (kode ' . $file['error'] . ').');
+    if ($file['size'] > 2 * 1024 * 1024) throw new RuntimeException('Ukuran foto maksimal 2MB.');
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($file['tmp_name']);
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    if (!isset($allowed[$mime])) throw new RuntimeException('Format foto harus JPG, PNG, atau WebP.');
+
+    $dir = __DIR__ . '/../uploads/items';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+    // Delete old image if replaced
+    if ($old_image) {
+        $old_path = $dir . '/' . basename($old_image);
+        if (is_file($old_path)) @unlink($old_path);
+    }
+
+    $filename = 'item_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $filename)) {
+        throw new RuntimeException('Gagal menyimpan file foto.');
+    }
+    return 'uploads/items/' . $filename;
+}
+
+// Delete item image file from disk
+function delete_item_image(?string $image): void {
+    if (!$image) return;
+    $path = __DIR__ . '/../' . $image;
+    if (is_file($path) && strpos(realpath($path), realpath(__DIR__ . '/../uploads/items')) === 0) {
+        @unlink($path);
+    }
+}
