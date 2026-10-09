@@ -3,10 +3,16 @@
 Sistem Manajemen Inventori & Gudang — PHP Native + MySQLi + Bootstrap 5.
 
 ## Stack
-- PHP 8.5+ (Native, no framework)
-- MySQLi with prepared statements
-- Bootstrap 5.3 + Bootstrap Icons (CDN)
+- PHP 8.5+ (Native, tanpa framework)
+- MySQLi dengan prepared statements
 - MySQL / MariaDB
+- Bootstrap 5.3.8 + Bootstrap Icons 1.13.2 (CDN)
+- Chart.js 4.5.1 (CDN)
+- Tom Select 2.3.1 (CDN)
+- Vanilla JavaScript
+- PWA (Web App Manifest + Service Worker)
+- `html5-qrcode` (lokal) untuk pemindaian barcode/QR
+- Generator PDF dan parser XLSX native tanpa Composer
 
 ## Instalasi
 
@@ -185,6 +191,7 @@ maura-warehouse/
 - **Stok** — snapshot stok saat ini per item & lokasi; export CSV
 - **Barang Masuk** — riwayat transaksi masuk dengan filter tanggal & supplier
 - **Barang Keluar** — riwayat transaksi keluar dengan filter tanggal & lokasi
+- **Performa Supplier** — jumlah dan tingkat penyelesaian PO, rata-rata lead time, ketepatan pengiriman, total nilai pembelian, filter periode/supplier, dan ekspor CSV
 
 ### Manajemen User & Role
 - CRUD user; nama, username, email, peran
