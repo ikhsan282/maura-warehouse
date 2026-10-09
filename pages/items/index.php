@@ -58,7 +58,7 @@ include __DIR__ . '/../../includes/header.php';
 </div>
 
 <div class="card table-card">
-  <div class="card-header bg-white py-2">
+  <div class="card-header bg-white py-2 d-flex flex-wrap justify-content-between gap-2">
     <form class="d-flex flex-wrap gap-2" method="GET">
       <input type="text" name="q" class="form-control form-control-sm" style="max-width:240px"
         placeholder="Cari kode / nama..." value="<?= htmlspecialchars($search) ?>">
@@ -71,11 +71,16 @@ include __DIR__ . '/../../includes/header.php';
       <button class="btn btn-sm btn-outline-secondary">Filter</button>
       <?php if ($search||$cat_filter): ?><a href="?" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i> Reset</a><?php endif; ?>
     </form>
+    <?php if (can('items.labels')): ?>
+    <form id="labelForm" method="GET" action="<?= APP_URL ?>/pages/items/labels.php">
+      <button class="btn btn-sm btn-outline-dark"><i class="bi bi-upc me-1"></i>Cetak Label Terpilih</button>
+    </form>
+    <?php endif; ?>
   </div>
   <div class="table-responsive">
     <table class="table mb-0">
       <thead>
-        <tr><th>#</th><th>Foto</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th>
+        <tr><th><?php if(can('items.labels')):?><input class="form-check-input" type="checkbox" onclick="document.querySelectorAll('[name=\'id[]\']').forEach(x=>x.checked=this.checked)"><?php else:?>#<?php endif;?></th><th>Foto</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th>
         <th class="text-end">Stok</th><th class="text-end">Harga Beli</th><th class="text-end">Harga Jual</th><th class="text-center">Aksi</th></tr>
       </thead>
       <tbody>
@@ -85,7 +90,7 @@ include __DIR__ . '/../../includes/header.php';
         $stock_class = $r['total_stock'] == 0 ? 'badge-zero' : ($r['total_stock'] <= $r['min_stock'] ? 'badge-low' : 'badge-ok');
       ?>
         <tr>
-          <td class="small text-muted"><?= $pag['offset']+$i+1 ?></td>
+          <td class="small text-muted"><?php if(can('items.labels')):?><input form="labelForm" class="form-check-input" type="checkbox" name="id[]" value="<?=$r['id']?>"><?php else:?><?= $pag['offset']+$i+1 ?><?php endif;?></td>
           <td>
             <?php if (!empty($r['image'])): ?>
               <img src="<?= APP_URL ?>/<?= htmlspecialchars($r['image']) ?>" alt="" class="rounded border" style="width:44px;height:44px;object-fit:cover">

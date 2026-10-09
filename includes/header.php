@@ -6,6 +6,10 @@ require_once __DIR__ . '/../includes/auth.php';
 
 $current_user = current_user();
 $page_title   = $page_title ?? APP_NAME;
+$low_stock_count = 0;
+if ($current_user && can('stock.alerts')) {
+    $low_stock_count = getDB()->query('SELECT COUNT(*) FROM (SELECT i.id FROM items i LEFT JOIN stock s ON s.item_id=i.id WHERE i.is_active=1 GROUP BY i.id, i.min_stock HAVING COALESCE(SUM(s.quantity),0) <= i.min_stock) low')->fetch_row()[0];
+}
 ?><!DOCTYPE html>
 <html lang="id">
 <head>
@@ -36,6 +40,12 @@ $page_title   = $page_title ?? APP_NAME;
       </button>
       <span class="navbar-brand fw-semibold text-primary mb-0 h6"><?= htmlspecialchars($page_title) ?></span>
       <div class="ms-auto d-flex align-items-center gap-2">
+        <?php if (can('stock.alerts')): ?>
+        <a class="btn btn-sm btn-outline-warning position-relative" href="<?= APP_URL ?>/pages/stock/alerts.php" title="Peringatan stok">
+          <i class="bi bi-bell"></i>
+          <?php if ($low_stock_count): ?><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><?= $low_stock_count ?></span><?php endif; ?>
+        </a>
+        <?php endif; ?>
         <button class="btn btn-sm btn-outline-secondary" id="darkToggle" title="Toggle tema">
           <i class="bi bi-moon-stars"></i>
         </button>

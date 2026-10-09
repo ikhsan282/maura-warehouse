@@ -82,6 +82,9 @@ maura-warehouse/
 │   ├── units/                 # index (CRUD modal)
 │   ├── suppliers/             # index (CRUD modal)
 │   ├── locations/             # index (CRUD modal)
+│   ├── purchase-orders/        # PO CRUD, detail, status workflow, receive
+│   ├── items/labels.php        # Printable browser barcode labels
+│   ├── stock/alerts.php        # Low-stock badge/list and PO suggestions
 │   ├── stock-in/              # index, create, view, delete
 │   ├── stock-out/             # index, create, view, delete
 │   ├── transfers/             # index, create, view, delete
@@ -107,6 +110,15 @@ maura-warehouse/
 - Aplikasi dapat dipasang di ponsel melalui `manifest.json` dan service worker, dengan halaman fallback saat offline
 - Portal mobile khusus Staff Gudang dan Viewer untuk cek stok serta aktivitas transaksi
 - Dark mode persisten mengikuti preferensi pengguna
+
+### Purchase Order
+- CRUD draft PO with supplier, destination location, order/expected dates, line items, and status workflow: draft → ordered → received/cancelled.
+- Receive action is CSRF/RBAC protected and uses one transaction with row locking; it creates the stock-in document, details, stock updates, and mutation audit entries together.
+- A PO can only be received once; the received stock-in reference is linked back to the PO.
+- Low-stock page shows an accurate in-app badge/list and quantity/value restock suggestions; suggestions can prefill a new PO.
+
+### Barcode Labels
+- Select active items from the item list and print browser-printable Code 39 SVG labels using the existing item code (no new dependency or build tool).
 
 ### Dashboard
 - Statistik real-time: total barang aktif, jumlah item stok menipis, nilai total inventori (qty × harga beli), jumlah transaksi masuk+keluar hari ini

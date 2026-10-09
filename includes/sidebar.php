@@ -82,10 +82,22 @@ function nav_active(string $path): string {
     </a>
     <?php endif; ?>
 
+    <?php if (can('purchase_orders.view')): ?>
+    <a href="<?= APP_URL ?>/pages/purchase-orders/index.php" class="sidebar-link <?= nav_active('/purchase-orders') ?>">
+      <i class="bi bi-cart-check"></i><span class="sidebar-label">Purchase Order</span>
+    </a>
+    <?php endif; ?>
+
     <?php if (can('stock.view')): ?>
     <div class="sidebar-section-title sidebar-label">STOK</div>
     <a href="<?= APP_URL ?>/pages/stock/index.php" class="sidebar-link <?= nav_active('/stock') ?>">
       <i class="bi bi-clipboard-data"></i><span class="sidebar-label">Cek Stok</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('stock.alerts')): ?>
+    <a href="<?= APP_URL ?>/pages/stock/alerts.php" class="sidebar-link <?= nav_active('/stock/alerts') ?>">
+      <i class="bi bi-bell"></i><span class="sidebar-label">Peringatan Stok</span>
     </a>
     <?php endif; ?>
 

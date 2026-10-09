@@ -16,7 +16,9 @@ $total_locations = $db->query('SELECT COUNT(*) FROM locations WHERE is_active=1'
 $inv_value = $db->query('SELECT COALESCE(SUM(s.quantity * i.buy_price),0) FROM stock s JOIN items i ON i.id=s.item_id')->fetch_row()[0];
 
 // Low stock items
+$low_stock_count = $db->query('SELECT COUNT(*) FROM (SELECT i.id FROM items i LEFT JOIN stock s ON s.item_id=i.id WHERE i.is_active=1 GROUP BY i.id,i.min_stock HAVING COALESCE(SUM(s.quantity),0)<=i.min_stock) low')->fetch_row()[0];
 $low_stock = $db->query('SELECT i.code, i.name, i.min_stock, COALESCE(SUM(s.quantity),0) AS total_stock,
+    GREATEST(i.min_stock*2-COALESCE(SUM(s.quantity),0),1) AS suggested_qty,
     u.abbreviation FROM items i
     LEFT JOIN stock s ON s.item_id=i.id
     LEFT JOIN units u ON u.id=i.unit_id
@@ -82,7 +84,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="d-flex align-items-center gap-3">
         <div class="icon-box bg-warning-subtle text-warning"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <div>
-          <div class="fs-4 fw-bold text-warning"><?= count($low_stock) ?></div>
+          <div class="fs-4 fw-bold text-warning"><?= $low_stock_count ?></div>
           <div class="text-muted small">Stok Menipis</div>
         </div>
       </div>

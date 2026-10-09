@@ -225,6 +225,40 @@ CREATE TABLE `stock_adjustment_details` (
   FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
 ) ENGINE=InnoDB;
 
+-- Purchase Orders
+CREATE TABLE `purchase_orders` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `reference_no` VARCHAR(50) NOT NULL UNIQUE,
+  `supplier_id` INT UNSIGNED NOT NULL,
+  `location_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `status` ENUM('draft','ordered','received','cancelled') DEFAULT 'draft',
+  `order_date` DATE NOT NULL,
+  `expected_date` DATE NULL,
+  `received_by` INT UNSIGNED NULL,
+  `received_at` TIMESTAMP NULL,
+  `stock_in_id` INT UNSIGNED NULL,
+  `notes` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
+  FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`received_by`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`stock_in_id`) REFERENCES `stock_in`(`id`),
+  UNIQUE KEY `stock_in_unique` (`stock_in_id`)
+) ENGINE=InnoDB;
+
+-- Purchase Order Details
+CREATE TABLE `purchase_order_details` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `po_id` INT UNSIGNED NOT NULL,
+  `item_id` INT UNSIGNED NOT NULL,
+  `quantity` INT NOT NULL,
+  `buy_price` DECIMAL(15,2) DEFAULT 0,
+  FOREIGN KEY (`po_id`) REFERENCES `purchase_orders`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
+) ENGINE=InnoDB;
+
 -- Mutation Log (audit trail)
 CREATE TABLE `mutations` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -294,6 +328,13 @@ INSERT INTO `permissions` (`name`, `description`) VALUES
 ('adjustments.create', 'Buat penyesuaian stok'),
 ('adjustments.approve', 'Approve penyesuaian stok'),
 ('stock.view', 'Lihat stok'),
+('purchase_orders.view', 'Lihat purchase order'),
+('purchase_orders.create', 'Buat purchase order'),
+('purchase_orders.edit', 'Edit purchase order'),
+('purchase_orders.receive', 'Terima purchase order'),
+('purchase_orders.cancel', 'Batalkan purchase order'),
+('items.labels', 'Cetak label barcode'),
+('stock.alerts', 'Lihat peringatan stok'),
 ('reports.view', 'Lihat laporan');
 
 -- Super Admin: all permissions
@@ -308,8 +349,9 @@ SELECT 2, id FROM `permissions` WHERE `name` NOT IN ('users.delete','roles.edit'
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 3, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
-  'items.view','stock_in.view','stock_in.create','stock_out.view','stock_out.create',
-  'transfers.view','transfers.create','adjustments.view','adjustments.create','stock.view','reports.view'
+  'items.view','items.labels','stock_in.view','stock_in.create','stock_out.view','stock_out.create',
+  'transfers.view','transfers.create','adjustments.view','adjustments.create','stock.view','stock.alerts',
+  'purchase_orders.view','purchase_orders.create','purchase_orders.edit','purchase_orders.receive','reports.view'
 );
 
 -- Viewer
