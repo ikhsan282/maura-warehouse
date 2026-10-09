@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 require_perm('dashboard.view');
 
@@ -56,7 +56,7 @@ $top_items = $db->query('SELECT i.name, COALESCE(SUM(s.quantity * i.buy_price),0
     WHERE i.is_active=1 GROUP BY i.id ORDER BY value DESC LIMIT 5')->fetch_all(MYSQLI_ASSOC);
 
 $page_title = 'Dashboard';
-include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../includes/header.php';
 ?>
 <div class="page-header d-flex align-items-center justify-content-between">
   <div><h4><i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard</h4>
@@ -280,4 +280,4 @@ new Chart(document.getElementById('valueChart'), {
   }
 });
 </script>
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

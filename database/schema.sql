@@ -322,7 +322,7 @@ SELECT 4, id FROM `permissions` WHERE `name` IN (
 -- Default Super Admin user (password: Admin@123)
 INSERT INTO `users` (`role_id`, `name`, `username`, `email`, `password`, `email_verified_at`, `is_active`)
 VALUES (1, 'Super Administrator', 'superadmin', 'admin@maurawarehouse.com',
-  '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.usd2n/I96', -- password: password
+  '$2y$12$KBlsNPjTdH35lmxPkbhn..nl8LSF1UwPcHer.WsGRiEQkhKe8QY6G', -- password: Admin@123
   NOW(), 1);
 
 -- Seed: categories

@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['action']) && $_POST['action'] === 'clear') {
         $key = req_str('upload_key');
-        $path = sys_get_temp_dir() . '/maura_import_' . preg_replace('/[^a-zA-Z0-9]/', '', $key);
+        $filename = 'maura_import_' . hash('sha256', session_id() . ':' . $key);
+        $path = sys_get_temp_dir() . '/' . $filename;
         if (file_exists($path)) @unlink($path);
         set_flash('info', 'Preview dibersihkan.');
         redirect(APP_URL . '/pages/items/import.php');
@@ -23,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['action']) && $_POST['action'] === 'confirm') {
         $key = req_str('upload_key');
-        $path = sys_get_temp_dir() . '/maura_import_' . preg_replace('/[^a-zA-Z0-9]/', '', $key);
+        $filename = 'maura_import_' . hash('sha256', session_id() . ':' . $key);
+        $path = sys_get_temp_dir() . '/' . $filename;
         if (!file_exists($path)) {
             set_flash('error', 'Data upload tidak ditemukan. Upload ulang.');
             redirect(APP_URL . '/pages/items/import.php');

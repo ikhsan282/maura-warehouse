@@ -29,6 +29,8 @@ Edit `config/config.php`:
 ```php
 define('APP_URL', 'http://yourdomain.com/maura-warehouse');
 define('MAIL_FROM', 'no-reply@yourdomain.com');
+define('COMPANY_NAME', 'Nama Perusahaan');
+define('COMPANY_ADDRESS', 'Alamat Perusahaan');
 ```
 
 ### 4. Upload ke cPanel
@@ -39,7 +41,7 @@ define('MAIL_FROM', 'no-reply@yourdomain.com');
 ### 5. Login Default
 | Username | Password | Peran |
 |---|---|---|
-| `superadmin` | `password` | Super Admin |
+| `superadmin` | `Admin@123` | Super Admin |
 
 > **Ganti password segera setelah login pertama!**
 
@@ -108,6 +110,7 @@ maura-warehouse/
 
 ### Master Data
 - **Barang** — CRUD lengkap; kode, nama, kategori, satuan, harga beli, stok minimum, status aktif; **foto barang** JPG/PNG/WebP maks 2MB (tampil di list & detail); halaman view menampilkan stok per lokasi
+- **Import Barang Excel/CSV** — upload `.csv`/`.xlsx` maks 5MB/1.000 baris, preview dan validasi per baris, kode duplikat dilewati, kompatibel Excel/cPanel tanpa Composer
 - **Kategori** — CRUD via modal; nama & deskripsi
 - **Satuan** — CRUD via modal; nama & singkatan
 - **Supplier** — CRUD via modal; kode, nama, kontak
@@ -143,6 +146,11 @@ maura-warehouse/
 ### Cek Stok
 - Tabel stok per item per lokasi
 - Alert visual untuk item di bawah stok minimum
+
+### Cetak Dokumen / Simpan PDF
+- Halaman cetak mandiri untuk Barang Masuk, Barang Keluar/Surat Jalan, dan Transfer Lokasi
+- Format A4 dengan identitas perusahaan, tabel barang, catatan, dan area tanda tangan
+- Gunakan dialog browser **Cetak → Simpan sebagai PDF** — tanpa library/Composer dan kompatibel XAMPP/cPanel
 
 ### Laporan
 - **Mutasi Barang** — filter: rentang tanggal, barang, tipe (masuk/keluar/transfer masuk/transfer keluar); tabel: waktu, kode, nama, tipe, lokasi, qty, referensi, oleh; export CSV (UTF-8 BOM untuk Excel)
