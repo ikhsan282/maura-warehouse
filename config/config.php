@@ -1,27 +1,27 @@
 <?php
-define('APP_NAME', 'Maura Warehouse');
-define('APP_VERSION', '1.0.0');
-define('APP_URL', 'http://localhost:8080/maura-warehouse'); // change for production
-define('APP_TIMEZONE', 'Asia/Jakarta');
+defined('APP_NAME') || define('APP_NAME', 'Maura Warehouse');
+defined('APP_VERSION') || define('APP_VERSION', '1.0.0');
+defined('APP_URL') || define('APP_URL', 'http://localhost:8080/maura-warehouse'); // change for production
+defined('APP_TIMEZONE') || define('APP_TIMEZONE', 'Asia/Jakarta');
 
 // Email (PHP mail() — works on shared hosting)
-define('MAIL_FROM', 'no-reply@maurawarehouse.com');
-define('MAIL_FROM_NAME', 'Maura Warehouse');
+defined('MAIL_FROM') || define('MAIL_FROM', 'no-reply@maurawarehouse.com');
+defined('MAIL_FROM_NAME') || define('MAIL_FROM_NAME', 'Maura Warehouse');
 
 // Session
-define('SESSION_LIFETIME', 7200); // 2 hours
+defined('SESSION_LIFETIME') || define('SESSION_LIFETIME', 7200); // 2 hours
 
 // Pagination
-define('PER_PAGE', 20);
+defined('PER_PAGE') || define('PER_PAGE', 20);
 
 // Company identity (used on printed documents)
-define('COMPANY_NAME', 'Maura Warehouse');
-define('COMPANY_ADDRESS', 'Jl. Contoh No. 123, Jakarta'); // change for production
+defined('COMPANY_NAME') || define('COMPANY_NAME', 'Maura Warehouse');
+defined('COMPANY_ADDRESS') || define('COMPANY_ADDRESS', 'Jl. Contoh No. 123, Jakarta'); // change for production
 
 date_default_timezone_set(APP_TIMEZONE);
 
 // Start session once
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
         'path'     => '/',

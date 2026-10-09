@@ -46,7 +46,7 @@ function receive_purchase_order_partial(mysqli $db, int $po_id, array $receive_q
         if (empty($to_receive)) throw new RuntimeException('Tidak ada barang yang diterima.');
 
         // Create stock-in record
-        $ref = 'SI-' . $po['reference_no'] . '-' . date('YmdHis');
+        $ref = 'SI-' . $po['reference_no'] . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
         $today = date('Y-m-d');
         $notes = trim('Penerimaan ' . $po['reference_no'] . '. ' . ($po['notes'] ?? ''));
         $insert = $db->prepare('INSERT INTO stock_in (reference_no,supplier_id,location_id,user_id,notes,transaction_date) VALUES (?,?,?,?,?,?)');

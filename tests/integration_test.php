@@ -57,7 +57,7 @@ function q(mysqli $db, string $sql): void { if ($db->query($sql) === false) die(
 q($db, "INSERT INTO locations (id,code,name,is_active) VALUES (100,'A1','Test Location',1),(101,'B1','Second',1)");
 q($db, "INSERT INTO suppliers (id,code,name,is_active) VALUES (100,'SUP001','Test Supplier',1)");
 q($db, "INSERT INTO items (id,code,name,category_id,unit_id,min_stock,buy_price,is_active) VALUES (100,'ITEM001','Test Item 1',1,1,10,1000,1),(101,'ITEM002','Test Item 2',1,1,5,2000,1)");
-q($db, "INSERT INTO purchase_orders (id,reference_no,supplier_id,location_id,user_id,status,order_date) VALUES (100,'PO-TEST-001',100,100,1,'ordered','2026-10-09')");
+q($db, "INSERT INTO purchase_orders (id,reference_no,supplier_id,location_id,user_id,status,approval_status,order_date) VALUES (100,'PO-TEST-001',100,100,1,'pending','approved','2026-10-09')");
 q($db, "INSERT INTO purchase_order_details (po_id,item_id,quantity,buy_price) VALUES (100,100,20,1000),(100,101,10,2000)");
 
 echo "--- Test 1: PO Concurrent Receive Safety ---\n";
@@ -73,7 +73,7 @@ try {
 
 // Check PO status changed
 $po = $db->query("SELECT status FROM purchase_orders WHERE id=100")->fetch_assoc();
-test('PO status = received', $po['status'] === 'received');
+test('PO status = completed', $po['status'] === 'completed');
 
 // Check stock_in created
 $si_count = (int)$db->query("SELECT COUNT(*) FROM stock_in WHERE reference_no LIKE 'SI-PO-TEST-001%'")->fetch_row()[0];
@@ -105,7 +105,7 @@ test('Stock not doubled', (int)$stock1_after['quantity'] === 20);
 $holder = new mysqli(DB_HOST, DB_USER, DB_PASS, TEST_DB, DB_PORT);
 $contender = new mysqli(DB_HOST, DB_USER, DB_PASS, TEST_DB, DB_PORT);
 $contender->query("SET SESSION innodb_lock_wait_timeout=1");
-q($db, "INSERT INTO purchase_orders (id,reference_no,supplier_id,location_id,user_id,status,order_date) VALUES (101,'PO-RACE',100,100,1,'ordered','2026-10-09')");
+q($db, "INSERT INTO purchase_orders (id,reference_no,supplier_id,location_id,user_id,status,approval_status,order_date) VALUES (101,'PO-RACE',100,100,1,'pending','approved','2026-10-09')");
 q($db, "INSERT INTO purchase_order_details (po_id,item_id,quantity,buy_price) VALUES (101,100,7,1000)");
 $holder->begin_transaction();
 $holder->query("SELECT id FROM purchase_orders WHERE id=101 FOR UPDATE");
@@ -118,7 +118,7 @@ try {
 $holder->rollback();
 $ref2 = receive_purchase_order($contender, 101, 2);
 test('Receive succeeds once lock released', str_starts_with($ref2, 'SI-'));
-test('Exactly one stock-in for race PO', (int)$db->query("SELECT COUNT(*) FROM stock_in WHERE reference_no='SI-PO-RACE'")->fetch_row()[0] === 1);
+test('Exactly one stock-in for race PO', (int)$db->query("SELECT COUNT(*) FROM stock_in WHERE reference_no LIKE 'SI-PO-RACE%'")->fetch_row()[0] === 1);
 test('Race PO stock added once (7)', (int)$db->query("SELECT quantity FROM stock WHERE item_id=100 AND location_id=100")->fetch_row()[0] === 27);
 
 echo "\n--- Test 2: Barcode Label Format ---\n";

@@ -19,11 +19,11 @@ function test(string $name, bool $pass, string $reason = ''): void {
 }
 
 // Override DB config for test
-define('DB_HOST', '/opt/data/cache/scratch/mariadb/socket/mysqld.sock');
+define('DB_HOST', '127.0.0.1');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'db_maura_warehouse_test');
-define('DB_PORT', 0);
+define('DB_PORT', 13306);
 define('DB_CHARSET', 'utf8mb4');
 
 // Override config constants
@@ -43,14 +43,16 @@ if (!function_exists('send_mail')) {
     }
 }
 
-function getDB(): mysqli {
-    static $conn = null;
-    if ($conn) return $conn;
-    mysqli_report(MYSQLI_REPORT_OFF);
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
-    if ($conn->connect_error) die("DB connection failed: " . $conn->connect_error);
-    $conn->set_charset(DB_CHARSET);
-    return $conn;
+if (!function_exists('getDB')) {
+    function getDB(): mysqli {
+        static $conn = null;
+        if ($conn) return $conn;
+        mysqli_report(MYSQLI_REPORT_OFF);
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+        if ($conn->connect_error) die("DB connection failed: " . $conn->connect_error);
+        $conn->set_charset(DB_CHARSET);
+        return $conn;
+    }
 }
 
 // Load dependencies (send_mail already mocked above)
@@ -72,17 +74,16 @@ $db = getDB();
 function q(mysqli $db, string $sql): void { if ($db->query($sql) === false) die("SQL failed: {$db->error}\n$sql\n"); }
 
 // Seed test data
-q($db, "INSERT INTO locations (id,code,name,is_active) VALUES (1,'A1','Main',1)");
-q($db, "INSERT INTO suppliers (id,code,name,is_active) VALUES (1,'SUP001','Test Supplier',1)");
+q($db, "INSERT INTO suppliers (id,code,name,is_active) VALUES (100,'SUP001','Test Supplier',1)");
 q($db, "INSERT INTO items (id,code,name,category_id,unit_id,min_stock,buy_price,is_active) VALUES 
-    (1,'ITEM001','Low Stock Item',1,1,10,1000,1),
-    (2,'ITEM002','Zero Stock Item',1,1,5,2000,1),
-    (3,'ITEM003','OK Stock Item',1,1,5,1500,1)");
+    (100,'ITEM001','Low Stock Item',1,1,10,1000,1),
+    (101,'ITEM002','Zero Stock Item',1,1,5,2000,1),
+    (102,'ITEM003','OK Stock Item',1,1,5,1500,1)");
 
 echo "--- Test 1: get_low_stock_items() ---\n";
 
 // Set stock levels: item 1 = 5 (below min 10), item 2 = 0 (below min 5), item 3 = 10 (above min 5)
-q($db, "INSERT INTO stock (item_id,location_id,quantity) VALUES (1,1,5),(3,1,10)");
+q($db, "INSERT INTO stock (item_id,location_id,quantity) VALUES (100,1,5),(102,1,10)");
 
 $items = get_low_stock_items();
 test('Returns array', is_array($items));
@@ -122,7 +123,7 @@ test('Contains suggested qty', str_contains($body, 'Saran Pesan'));
 
 // Check HTML escaping
 q($db, "INSERT INTO items (id,code,name,category_id,unit_id,min_stock,buy_price,is_active) VALUES 
-    (4,'XSS<script>','Test<b>HTML</b>',1,1,10,100,1)");
+    (103,'XSS<script>','Test<b>HTML</b>',1,1,10,100,1)");
 $xss_items = get_low_stock_items();
 $xss_body = build_low_stock_email_body($xss_items);
 test('Escapes HTML in item name', !str_contains($xss_body, '<b>HTML</b>'));
@@ -152,8 +153,9 @@ test('Output logged timestamp', str_contains($output, date('Y-m-d')));
 echo "\n--- Test 4: No low stock (skip email) ---\n";
 
 // Remove all low stock
-q($db, "UPDATE stock SET quantity=100 WHERE item_id IN (1,2,3)");
-q($db, "DELETE FROM items WHERE id=4"); // Remove XSS test item
+q($db, "INSERT INTO stock (item_id,location_id,quantity) VALUES (100,1,100),(101,1,100),(102,1,100)
+    ON DUPLICATE KEY UPDATE quantity=VALUES(quantity)");
+q($db, "DELETE FROM items WHERE id=103"); // Remove XSS test item
 
 $GLOBALS['test_mail_sent'] = false;
 ob_start();

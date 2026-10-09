@@ -12,8 +12,8 @@ function test(string $name, bool $ok, string $reason = ''): void {
 }
 function generate_ref(string $prefix): string { return $prefix . bin2hex(random_bytes(5)); }
 
-const HOST = '/opt/data/cache/scratch/mariadb/socket/mysqld.sock';
-const PORT = 0;
+const HOST = '127.0.0.1';
+const PORT = 13306;
 const TEST_DB = 'db_maura_warehouse_test_opname';
 $boot = new mysqli(HOST, 'root', '', '', PORT);
 $boot->query('DROP DATABASE IF EXISTS `' . TEST_DB . '`');

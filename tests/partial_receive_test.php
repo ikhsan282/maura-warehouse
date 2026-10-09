@@ -17,11 +17,11 @@ function test(string $name, bool $pass, string $reason = ''): void {
 }
 
 // Override DB config for test
-define('DB_HOST', '/opt/data/cache/scratch/mariadb/socket/mysqld.sock');
+define('DB_HOST', '127.0.0.1');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'db_maura_warehouse');
-define('DB_PORT', 0);
+define('DB_PORT', 13306);
 define('DB_CHARSET', 'utf8mb4');
 
 function getDB(): mysqli {
