@@ -436,12 +436,12 @@ SELECT 4, id FROM `permissions` WHERE `name` IN (
   'items.view','stock_in.view','stock_out.view','transfers.view','adjustments.view','stock.view','reports.view','supplier_returns.view'
 );
 
--- Default users for each role (password: Admin@123)
+-- Default users for each role (password: P@ssw0rd)
 INSERT INTO `users` (`role_id`, `name`, `username`, `email`, `password`, `email_verified_at`, `is_active`) VALUES
-(1, 'Super Administrator', 'superadmin',  'admin@maurawarehouse.com',    '$2y$12$KBlsNPjTdH35lmxPkbhn..nl8LSF1UwPcHer.WsGRiEQkhKe8QY6G', NOW(), 1),
-(2, 'Admin',               'admin',       'admin2@maurawarehouse.com',   '$2y$12$KBlsNPjTdH35lmxPkbhn..nl8LSF1UwPcHer.WsGRiEQkhKe8QY6G', NOW(), 1),
-(3, 'Staff Gudang',        'staffgudang', 'staffgudang@maurawarehouse.com', '$2y$12$KBlsNPjTdH35lmxPkbhn..nl8LSF1UwPcHer.WsGRiEQkhKe8QY6G', NOW(), 1),
-(4, 'Viewer',              'viewer',      'viewer@maurawarehouse.com',   '$2y$12$KBlsNPjTdH35lmxPkbhn..nl8LSF1UwPcHer.WsGRiEQkhKe8QY6G', NOW(), 1);
+(1, 'Super Administrator', 'superadmin',  'admin@maurawarehouse.com',    '$2y$12$oucBlvl6RGkxgjQ0iAF2IehCiJI2tn9epJCvpnW/A0BBFcRKnbTfu', NOW(), 1),
+(2, 'Admin',               'admin',       'admin2@maurawarehouse.com',   '$2y$12$oucBlvl6RGkxgjQ0iAF2IehCiJI2tn9epJCvpnW/A0BBFcRKnbTfu', NOW(), 1),
+(3, 'Staff Gudang',        'staffgudang', 'staffgudang@maurawarehouse.com', '$2y$12$oucBlvl6RGkxgjQ0iAF2IehCiJI2tn9epJCvpnW/A0BBFcRKnbTfu', NOW(), 1),
+(4, 'Viewer',              'viewer',      'viewer@maurawarehouse.com',   '$2y$12$oucBlvl6RGkxgjQ0iAF2IehCiJI2tn9epJCvpnW/A0BBFcRKnbTfu', NOW(), 1);
 
 -- Seed: categories
 INSERT INTO `categories` (`code`, `name`) VALUES
