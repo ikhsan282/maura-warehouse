@@ -51,6 +51,11 @@ function redirect(string $url): void {
     exit;
 }
 
+// HTML escape
+function e(?string $str): string {
+    return $str !== null ? htmlspecialchars($str, ENT_QUOTES, 'UTF-8') : '';
+}
+
 // Format currency IDR
 function idr(float $amount): string {
     return 'Rp ' . number_format($amount, 0, ',', '.');
