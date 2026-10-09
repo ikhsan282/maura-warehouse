@@ -41,10 +41,10 @@ define('COMPANY_ADDRESS', 'Alamat Perusahaan');
 ### 5. Login Default
 | Username | Password | Peran |
 |---|---|---|
-| `superadmin` | `Admin@123` | Super Admin |
-| `admin` | `Admin@123` | Admin |
-| `staffgudang` | `Admin@123` | Staff Gudang |
-| `viewer` | `Admin@123` | Viewer |
+| `superadmin` | `P@ssw0rd` | Super Admin |
+| `admin` | `P@ssw0rd` | Admin |
+| `staffgudang` | `P@ssw0rd` | Staff Gudang |
+| `viewer` | `P@ssw0rd` | Viewer |
 
 > **Ganti password segera setelah login pertama!**
 
