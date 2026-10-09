@@ -259,6 +259,34 @@ CREATE TABLE `purchase_order_details` (
   FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
 ) ENGINE=InnoDB;
 
+-- Supplier Returns
+CREATE TABLE `supplier_returns` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `reference_no` VARCHAR(50) NOT NULL UNIQUE,
+  `supplier_id` INT UNSIGNED NOT NULL,
+  `location_id` INT UNSIGNED NOT NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `reason` VARCHAR(255) NOT NULL,
+  `status` ENUM('completed','cancelled') NOT NULL DEFAULT 'completed',
+  `notes` TEXT,
+  `transaction_date` DATE NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
+  FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB;
+
+-- Supplier Return Details
+CREATE TABLE `supplier_return_details` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `return_id` INT UNSIGNED NOT NULL,
+  `item_id` INT UNSIGNED NOT NULL,
+  `quantity` INT NOT NULL,
+  `buy_price` DECIMAL(15,2) DEFAULT 0,
+  FOREIGN KEY (`return_id`) REFERENCES `supplier_returns`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
+) ENGINE=InnoDB;
+
 -- Mutation Log (audit trail)
 CREATE TABLE `mutations` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -267,7 +295,7 @@ CREATE TABLE `mutations` (
   `type` ENUM('in','out','transfer_in','transfer_out','adjustment') NOT NULL,
   `quantity` INT NOT NULL,
   `reference_no` VARCHAR(50),
-  `reference_type` ENUM('stock_in','stock_out','transfer','adjustment') NOT NULL,
+  `reference_type` ENUM('stock_in','stock_out','transfer','adjustment','supplier_return') NOT NULL,
   `reference_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
   `notes` TEXT,
@@ -335,6 +363,9 @@ INSERT INTO `permissions` (`name`, `description`) VALUES
 ('purchase_orders.cancel', 'Batalkan purchase order'),
 ('items.labels', 'Cetak label barcode'),
 ('stock.alerts', 'Lihat peringatan stok'),
+('supplier_returns.view', 'Lihat retur ke supplier'),
+('supplier_returns.create', 'Buat retur ke supplier'),
+('supplier_returns.delete', 'Hapus retur ke supplier'),
 ('reports.view', 'Lihat laporan');
 
 -- Super Admin: all permissions
@@ -351,14 +382,15 @@ SELECT 3, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
   'items.view','items.labels','stock_in.view','stock_in.create','stock_out.view','stock_out.create',
   'transfers.view','transfers.create','adjustments.view','adjustments.create','stock.view','stock.alerts',
-  'purchase_orders.view','purchase_orders.create','purchase_orders.edit','purchase_orders.receive','reports.view'
+  'purchase_orders.view','purchase_orders.create','purchase_orders.edit','purchase_orders.receive',
+  'supplier_returns.view','supplier_returns.create','reports.view'
 );
 
 -- Viewer
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT 4, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
-  'items.view','stock_in.view','stock_out.view','transfers.view','adjustments.view','stock.view','reports.view'
+  'items.view','stock_in.view','stock_out.view','transfers.view','adjustments.view','stock.view','reports.view','supplier_returns.view'
 );
 
 -- Default users for each role (password: Admin@123)

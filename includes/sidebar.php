@@ -88,6 +88,12 @@ function nav_active(string $path): string {
     </a>
     <?php endif; ?>
 
+    <?php if (can('supplier_returns.view')): ?>
+    <a href="<?= APP_URL ?>/pages/supplier-returns/index.php" class="sidebar-link <?= nav_active('/supplier-returns') ?>">
+      <i class="bi bi-arrow-return-left"></i><span class="sidebar-label">Retur Supplier</span>
+    </a>
+    <?php endif; ?>
+
     <?php if (can('stock.view')): ?>
     <div class="sidebar-section-title sidebar-label">STOK</div>
     <a href="<?= APP_URL ?>/pages/stock/index.php" class="sidebar-link <?= nav_active('/stock') ?>">

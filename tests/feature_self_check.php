@@ -13,6 +13,8 @@ $checks = [
     'PO receive is transactional' => str_contains(file_get_contents($root . '/includes/purchase_orders.php'), 'begin_transaction()'),
     'low-stock page' => is_file($root . '/pages/stock/alerts.php'),
     'barcode labels' => is_file($root . '/pages/items/labels.php'),
+    'supplier returns table' => str_contains($schema, 'CREATE TABLE `supplier_returns`'),
+    'supplier returns cancel locks row' => str_contains(file_get_contents($root . '/includes/supplier_returns.php'), 'FOR UPDATE'),
 ];
 $failed = array_keys(array_filter($checks, fn($ok) => !$ok));
 if ($failed) {

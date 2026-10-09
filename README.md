@@ -83,6 +83,7 @@ maura-warehouse/
 │   ├── suppliers/             # index (CRUD modal)
 │   ├── locations/             # index (CRUD modal)
 │   ├── purchase-orders/        # PO CRUD, detail, status workflow, receive
+│   ├── supplier-returns/       # index, create, view (cancel), retur ke supplier
 │   ├── items/labels.php        # Printable browser barcode labels
 │   ├── stock/alerts.php        # Low-stock badge/list and PO suggestions
 │   ├── stock-in/              # index, create, view, delete
@@ -116,6 +117,12 @@ maura-warehouse/
 - Receive action is CSRF/RBAC protected and uses one transaction with row locking; it creates the stock-in document, details, stock updates, and mutation audit entries together.
 - A PO can only be received once; the received stock-in reference is linked back to the PO.
 - Low-stock page shows an accurate in-app badge/list and quantity/value restock suggestions; suggestions can prefill a new PO.
+
+### Retur Supplier
+- Retur barang ke supplier: pilih supplier, lokasi asal, alasan wajib, dan daftar barang (qty, harga beli)
+- Stok lokasi dikurangi dalam satu transaksi dengan row lock; retur ditolak jika stok tidak cukup
+- Nomor referensi `RS-...`; setiap baris dicatat di mutasi sebagai `out` (sumber `supplier_return`)
+- Retur tidak dihapus: pembatalan mengembalikan stok, mencatat mutasi `in`, dan status menjadi `cancelled`
 
 ### Barcode Labels
 - Select active items from the item list and print browser-printable Code 39 SVG labels using the existing item code (no new dependency or build tool).
