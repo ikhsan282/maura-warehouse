@@ -1,7 +1,7 @@
 <?php
 define('APP_NAME', 'Maura Warehouse');
 define('APP_VERSION', '1.0.0');
-define('APP_URL', 'http://localhost/maura-warehouse'); // change for production
+define('APP_URL', 'http://localhost:8080/maura-warehouse'); // change for production
 define('APP_TIMEZONE', 'Asia/Jakarta');
 
 // Email (PHP mail() — works on shared hosting)
