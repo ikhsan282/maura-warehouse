@@ -25,7 +25,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
         'path'     => '/',
-        'secure'   => false, // set true on HTTPS
+        'secure'   => true, // requires HTTPS // set true on HTTPS
         'httponly' => true,
         'samesite' => 'Strict',
     ]);
