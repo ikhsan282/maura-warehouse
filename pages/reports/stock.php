@@ -48,8 +48,12 @@ $page_title='Laporan Stok'; include __DIR__.'/../../includes/header.php';
 ?>
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-bar-chart-line me-2 text-primary"></i>Laporan Stok Barang</h4>
-  <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'export'=>1])?>"
-     class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Export CSV</a>
+  <div class="btn-group btn-group-sm">
+    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'export'=>1])?>"
+       class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'format'=>'pdf'])?>"
+       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+  </div>
 </div>
 
 <div class="alert alert-info py-2 small">
@@ -125,5 +129,21 @@ if (req_int('export')) {
             $r['total_stock'],$r['min_stock'],$sl,$r['buy_price'],$r['stock_value']]);
     }
     fclose($out); exit;
+}
+if (req_str('format')==='pdf') {
+    require_once __DIR__.'/../../includes/pdf.php';
+    $pdf = new SimplePDF();
+    $pdf->addText('Laporan Stok Barang - '.date('d/m/Y'), 14);
+    $pdf->addText('Total Nilai Inventori: '.idr((float)$total_value), 10);
+    $pdf->addText('', 8);
+    $pdf->addTableRow(['Kode','Nama','Kategori','Stok','Min','Status'],[60,120,80,50,40,60],true);
+    foreach($rows as $r) {
+        $sl=$r['total_stock']==0?'Habis':($r['total_stock']<=$r['min_stock']?'Menipis':'Aman');
+        $pdf->addTableRow([$r['code'],$r['name'],$r['cat_name'],$r['total_stock'],$r['min_stock'],$sl],
+            [60,120,80,50,40,60]);
+    }
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="stok_'.date('Ymd').'.pdf"');
+    echo $pdf->output(); exit;
 }
 include __DIR__.'/../../includes/footer.php'; ?>

@@ -40,8 +40,12 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
 ?>
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-arrow-down-up me-2 text-primary"></i>Laporan Mutasi Barang</h4>
-  <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'export'=>1])?>"
-     class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Export CSV</a>
+  <div class="btn-group btn-group-sm">
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'export'=>1])?>"
+       class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'format'=>'pdf'])?>"
+       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+  </div>
 </div>
 
 <div class="card table-card">
@@ -116,5 +120,28 @@ if (req_int('export')) {
             $er['loc_name'],$er['quantity'],$er['abbreviation'],$er['reference_no'],$er['user_name']]);
     }
     $est->close(); fclose($out); exit;
+}
+if (req_str('format')==='pdf') {
+    require_once __DIR__.'/../../includes/pdf.php';
+    $pdf = new SimplePDF();
+    $pdf->addText('Laporan Mutasi Barang - '.date('d/m/Y'), 14);
+    $pdf->addText('Periode: '.$date_from.' s/d '.$date_to, 10);
+    $pdf->addText('', 8);
+    $pdf->addTableRow(['Waktu','Kode','Nama','Tipe','Lokasi','Qty','Ref'],[60,50,100,50,60,40,50],true);
+    $type_map=['in'=>'Masuk','out'=>'Keluar','transfer_in'=>'T.Masuk','transfer_out'=>'T.Keluar','adjustment'=>'Opname'];
+    $est=$db->prepare("SELECT m.*, i.code AS item_code, i.name AS item_name,
+        u.abbreviation, l.name AS loc_name FROM mutations m 
+        JOIN items i ON i.id=m.item_id JOIN units u ON u.id=i.unit_id
+        JOIN locations l ON l.id=m.location_id $where ORDER BY m.id DESC");
+    $est->bind_param($types,...$params); $est->execute(); $eres=$est->get_result();
+    while($er=$eres->fetch_assoc()) {
+        $pdf->addTableRow([substr($er['created_at'],0,16),$er['item_code'],$er['item_name'],
+            $type_map[$er['type']]??$er['type'],$er['loc_name'],$er['quantity'],$er['reference_no']],
+            [60,50,100,50,60,40,50]);
+    }
+    $est->close();
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="mutasi_'.date('Ymd').'.pdf"');
+    echo $pdf->output(); exit;
 }
 include __DIR__.'/../../includes/footer.php'; ?>
