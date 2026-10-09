@@ -2,7 +2,25 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Sidebar toggle (desktop) ─────────────────────────────
+  // ── Dark mode ─────────────────────────────────────────────
+  const darkToggle = document.getElementById('darkToggle');
+  function syncThemeIcon() {
+    const icon = darkToggle?.querySelector('i');
+    if (icon) icon.className = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  }
+  darkToggle?.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-bs-theme', next);
+    localStorage.setItem('mw_theme', next);
+    syncThemeIcon();
+  });
+  syncThemeIcon();
+
+  // ── PWA service worker ───────────────────────────────────
+  if ('serviceWorker' in navigator && window.APP_URL) {
+    navigator.serviceWorker.register(window.APP_URL + '/sw.js').catch(err => console.warn('SW registration failed:', err));
+  }
+
   const sidebar       = document.getElementById('sidebar');
   const toggleBtn     = document.getElementById('sidebarToggle');
   const toggleMobile  = document.getElementById('sidebarToggleMobile');

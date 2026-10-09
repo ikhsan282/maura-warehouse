@@ -103,6 +103,11 @@ maura-warehouse/
 
 ## Fitur
 
+### PWA, Portal Mobile & Dark Mode
+- Aplikasi dapat dipasang di ponsel melalui `manifest.json` dan service worker, dengan halaman fallback saat offline
+- Portal mobile khusus Staff Gudang dan Viewer untuk cek stok serta aktivitas transaksi
+- Dark mode persisten mengikuti preferensi pengguna
+
 ### Dashboard
 - Statistik real-time: total barang aktif, jumlah item stok menipis, nilai total inventori (qty × harga beli), jumlah transaksi masuk+keluar hari ini
 - **Grafik transaksi 7 hari terakhir** (Chart.js) — tren barang masuk vs keluar

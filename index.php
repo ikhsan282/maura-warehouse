@@ -9,6 +9,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!empty($_SESSION['user'])) {
+    $role = $_SESSION['user']['role_name'] ?? '';
+    if (in_array($role, ['Staff Gudang', 'Viewer'], true)) {
+        redirect(APP_URL . '/pages/portal.php');
+    }
     redirect(APP_URL . '/pages/dashboard.php');
 }
 

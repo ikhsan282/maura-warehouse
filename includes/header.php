@@ -12,6 +12,11 @@ $page_title   = $page_title ?? APP_NAME;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($page_title) ?> — <?= APP_NAME ?></title>
+  <meta name="theme-color" content="#0d6efd">
+  <link rel="manifest" href="<?= APP_URL ?>/manifest.json">
+  <script>
+  (function(){try{var t=localStorage.getItem('mw_theme');if(!t)t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-bs-theme',t);}catch(e){}})();
+  </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
@@ -31,6 +36,9 @@ $page_title   = $page_title ?? APP_NAME;
       </button>
       <span class="navbar-brand fw-semibold text-primary mb-0 h6"><?= htmlspecialchars($page_title) ?></span>
       <div class="ms-auto d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="darkToggle" title="Toggle tema">
+          <i class="bi bi-moon-stars"></i>
+        </button>
         <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
           <i class="bi bi-shield-check me-1"></i><?= htmlspecialchars($current_user['role_name']) ?>
         </span>
