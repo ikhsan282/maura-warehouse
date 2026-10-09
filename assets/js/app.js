@@ -82,14 +82,27 @@ document.addEventListener('DOMContentLoaded', () => {
       el.name  = el.name.replace(/\[\d+\]/, `[${idx}]`);
       el.value = '';
     });
+    // Destroy old Tom Select on cloned element and reinitialize
+    const sel = clone.querySelector('.ts-select');
+    if (sel?.tomselect) sel.tomselect.destroy();
     clone.querySelector('.remove-row')?.addEventListener('click', removeRow);
     itemsBody.appendChild(clone);
+    // Initialize Tom Select on new row
+    if (sel && window.TomSelect) {
+      new TomSelect(sel, {
+        allowEmptyOption: true,
+        placeholder: sel.querySelector('option[value=""]')?.textContent || 'Pilih...'
+      });
+    }
   });
 
   function removeRow(e) {
     const rows = itemsBody.querySelectorAll('tr');
     if (rows.length <= 1) return;
-    e.target.closest('tr').remove();
+    const row = e.target.closest('tr');
+    const sel = row?.querySelector('.ts-select');
+    if (sel?.tomselect) sel.tomselect.destroy();
+    row.remove();
   }
 
   itemsBody?.querySelectorAll('.remove-row').forEach(btn => {

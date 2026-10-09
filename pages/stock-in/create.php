@@ -89,7 +89,7 @@ $page_title = 'Tambah Barang Masuk'; include __DIR__.'/../../includes/header.php
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold required">Supplier</label>
-          <select name="supplier_id" class="form-select" required>
+          <select name="supplier_id" class="form-select ts-select" required>
             <option value="">— Pilih Supplier —</option>
             <?php foreach ($suppliers as $s): ?>
             <option value="<?=$s['id']?>" <?=req_int('supplier_id')==$s['id']?'selected':''?>>
@@ -100,7 +100,7 @@ $page_title = 'Tambah Barang Masuk'; include __DIR__.'/../../includes/header.php
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold required">Lokasi Tujuan</label>
-          <select name="location_id" class="form-select" required>
+          <select name="location_id" class="form-select ts-select" required>
             <option value="">— Pilih Lokasi —</option>
             <?php foreach ($locations as $l): ?>
             <option value="<?=$l['id']?>" <?=req_int('location_id')==$l['id']?'selected':''?>>
@@ -132,7 +132,7 @@ $page_title = 'Tambah Barang Masuk'; include __DIR__.'/../../includes/header.php
             <tr>
               <td>
                 <div class="input-group input-group-sm">
-                  <select name="item_id[0]" class="form-select form-select-sm item-select" required>
+                  <select name="item_id[0]" class="form-select form-select-sm item-select ts-select" required>
                     <option value="">— Pilih —</option>
                     <?php foreach ($items as $it): ?>
                     <option value="<?=$it['id']?>" data-code="<?=htmlspecialchars($it['code'])?>">[<?=htmlspecialchars($it['code'])?>] <?=htmlspecialchars($it['name'])?> (<?=htmlspecialchars($it['abbreviation'])?>)</option>

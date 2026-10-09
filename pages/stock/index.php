@@ -75,7 +75,7 @@ $page_title='Cek Stok'; include __DIR__.'/../../includes/header.php';
     <form class="d-flex flex-wrap gap-2" method="GET">
       <input type="text" name="q" class="form-control form-control-sm" style="max-width:220px"
         placeholder="Cari kode / nama..." value="<?= htmlspecialchars($search) ?>">
-      <select name="location_id" class="form-select form-select-sm" style="max-width:180px">
+      <select name="location_id" class="form-select form-select-sm ts-select" style="max-width:180px">
         <option value="">Semua Lokasi</option>
         <?php foreach($locations as $l): ?>
         <option value="<?=$l['id']?>" <?=$loc_filter==$l['id']?'selected':''?>><?=htmlspecialchars($l['code'])?> — <?=htmlspecialchars($l['name'])?></option>

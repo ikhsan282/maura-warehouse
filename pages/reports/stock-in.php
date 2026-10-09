@@ -66,7 +66,7 @@ $page_title='Laporan Barang Masuk'; include __DIR__.'/../../includes/header.php'
     <form class="d-flex flex-wrap gap-2" method="GET">
       <input type="date" name="date_from" class="form-control form-control-sm" style="max-width:150px" value="<?=htmlspecialchars($date_from)?>">
       <input type="date" name="date_to"   class="form-control form-control-sm" style="max-width:150px" value="<?=htmlspecialchars($date_to)?>">
-      <select name="supplier_id" class="form-select form-select-sm" style="max-width:200px">
+      <select name="supplier_id" class="form-select form-select-sm ts-select" style="max-width:200px">
         <option value="">Semua Supplier</option>
         <?php foreach($suppliers as $s): ?>
         <option value="<?=$s['id']?>" <?=$sup_filter==$s['id']?'selected':''?>><?=htmlspecialchars($s['name'])?></option>

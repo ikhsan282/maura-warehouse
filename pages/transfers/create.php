@@ -96,7 +96,7 @@ $page_title='Transfer Lokasi'; include __DIR__.'/../../includes/header.php';
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold required">Lokasi Asal</label>
-          <select name="from_location_id" class="form-select" required>
+          <select name="from_location_id" class="form-select ts-select" required>
             <option value="">— Pilih —</option>
             <?php foreach($locations as $l):?>
             <option value="<?=$l['id']?>" <?=req_int('from_location_id')==$l['id']?'selected':''?>>
@@ -107,7 +107,7 @@ $page_title='Transfer Lokasi'; include __DIR__.'/../../includes/header.php';
         </div>
         <div class="mb-3">
           <label class="form-label small fw-semibold required">Lokasi Tujuan</label>
-          <select name="to_location_id" class="form-select" required>
+          <select name="to_location_id" class="form-select ts-select" required>
             <option value="">— Pilih —</option>
             <?php foreach($locations as $l):?>
             <option value="<?=$l['id']?>" <?=req_int('to_location_id')==$l['id']?'selected':''?>>
@@ -136,7 +136,7 @@ $page_title='Transfer Lokasi'; include __DIR__.'/../../includes/header.php';
             <tr>
               <td>
                 <div class="input-group input-group-sm">
-                  <select name="item_id[0]" class="form-select form-select-sm item-select" required>
+                  <select name="item_id[0]" class="form-select form-select-sm item-select ts-select" required>
                     <option value="">— Pilih —</option>
                     <?php foreach($items as $it):?>
                     <option value="<?=$it['id']?>" data-code="<?=htmlspecialchars($it['code'])?>">[<?=htmlspecialchars($it['code'])?>] <?=htmlspecialchars($it['name'])?> (<?=htmlspecialchars($it['abbreviation'])?>)</option>

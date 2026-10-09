@@ -64,7 +64,7 @@ $page_title='Laporan Barang Keluar'; include __DIR__.'/../../includes/header.php
     <form class="d-flex flex-wrap gap-2" method="GET">
       <input type="date" name="date_from" class="form-control form-control-sm" style="max-width:150px" value="<?=htmlspecialchars($date_from)?>">
       <input type="date" name="date_to"   class="form-control form-control-sm" style="max-width:150px" value="<?=htmlspecialchars($date_to)?>">
-      <select name="location_id" class="form-select form-select-sm" style="max-width:180px">
+      <select name="location_id" class="form-select form-select-sm ts-select" style="max-width:180px">
         <option value="">Semua Lokasi</option>
         <?php foreach($locations as $l): ?>
         <option value="<?=$l['id']?>" <?=$loc_filter==$l['id']?'selected':''?>><?=htmlspecialchars($l['code'])?></option>
