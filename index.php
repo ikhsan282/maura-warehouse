@@ -39,8 +39,8 @@ if ($q_value) $inventory_value = (float)$q_value->fetch_row()[0];
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= e(APP_NAME) ?> — Sistem Manajemen Inventori & Gudang</title>
   <meta name="description" content="Sistem manajemen inventori, stok gudang, dan mutasi barang berbasis web untuk efisiensi operasional gudang dan supply chain.">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css">
   <style>
     :root {
       --brand-primary: #0d6efd;
@@ -339,6 +339,6 @@ if ($q_value) $inventory_value = (float)$q_value->fetch_row()[0];
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

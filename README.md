@@ -3,7 +3,7 @@
 Sistem Manajemen Inventori & Gudang — PHP Native + MySQLi + Bootstrap 5.
 
 ## Stack
-- PHP 7.4+ (Native, no framework)
+- PHP 8.5+ (Native, no framework)
 - MySQLi with prepared statements
 - Bootstrap 5.3 + Bootstrap Icons (CDN)
 - MySQL / MariaDB
