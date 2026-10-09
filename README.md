@@ -42,6 +42,9 @@ define('COMPANY_ADDRESS', 'Alamat Perusahaan');
 | Username | Password | Peran |
 |---|---|---|
 | `superadmin` | `Admin@123` | Super Admin |
+| `admin` | `Admin@123` | Admin |
+| `staffgudang` | `Admin@123` | Staff Gudang |
+| `viewer` | `Admin@123` | Viewer |
 
 > **Ganti password segera setelah login pertama!**
 
