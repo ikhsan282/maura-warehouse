@@ -195,6 +195,35 @@ CREATE TABLE `transfer_details` (
   FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
 ) ENGINE=InnoDB;
 
+-- Stock Opname Sessions
+CREATE TABLE `stock_opname` (
+  `session_id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `opname_date` DATE NOT NULL,
+  `status` ENUM('draft','finalized') NOT NULL DEFAULT 'draft',
+  `user_id` INT UNSIGNED NOT NULL,
+  `notes` TEXT,
+  `finalized_by` INT UNSIGNED NULL,
+  `finalized_at` TIMESTAMP NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`finalized_by`) REFERENCES `users`(`id`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `stock_opname_items` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `session_id` INT UNSIGNED NOT NULL,
+  `item_id` INT UNSIGNED NOT NULL,
+  `location_id` INT UNSIGNED NOT NULL,
+  `system_qty` INT NOT NULL,
+  `physical_qty` INT NOT NULL,
+  `variance` INT NOT NULL,
+  `counted_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `session_item_location` (`session_id`,`item_id`,`location_id`),
+  FOREIGN KEY (`session_id`) REFERENCES `stock_opname`(`session_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`item_id`) REFERENCES `items`(`id`),
+  FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`)
+) ENGINE=InnoDB;
+
 -- Stock Adjustments
 CREATE TABLE `stock_adjustments` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -206,10 +235,12 @@ CREATE TABLE `stock_adjustments` (
   `status` ENUM('draft','approved') DEFAULT 'draft',
   `notes` TEXT,
   `transaction_date` DATE NOT NULL,
+  `opname_session_id` INT UNSIGNED NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
-  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`)
+  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`opname_session_id`) REFERENCES `stock_opname`(`session_id`)
 ) ENGINE=InnoDB;
 
 -- Stock Adjustment Details
@@ -232,7 +263,11 @@ CREATE TABLE `purchase_orders` (
   `supplier_id` INT UNSIGNED NOT NULL,
   `location_id` INT UNSIGNED NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
-  `status` ENUM('draft','ordered','received','cancelled') DEFAULT 'draft',
+  `status` ENUM('draft','pending','partial','completed','cancelled') DEFAULT 'draft',
+  `approval_status` ENUM('draft','pending','approved','rejected') DEFAULT 'draft',
+  `approved_by` INT UNSIGNED NULL,
+  `approved_at` TIMESTAMP NULL,
+  `approval_notes` TEXT NULL,
   `order_date` DATE NOT NULL,
   `expected_date` DATE NULL,
   `received_by` INT UNSIGNED NULL,
@@ -243,6 +278,7 @@ CREATE TABLE `purchase_orders` (
   FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
   FOREIGN KEY (`location_id`) REFERENCES `locations`(`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`),
   FOREIGN KEY (`received_by`) REFERENCES `users`(`id`),
   FOREIGN KEY (`stock_in_id`) REFERENCES `stock_in`(`id`),
   UNIQUE KEY `stock_in_unique` (`stock_in_id`)
@@ -254,6 +290,7 @@ CREATE TABLE `purchase_order_details` (
   `po_id` INT UNSIGNED NOT NULL,
   `item_id` INT UNSIGNED NOT NULL,
   `quantity` INT NOT NULL,
+  `received_quantity` INT NOT NULL DEFAULT 0,
   `buy_price` DECIMAL(15,2) DEFAULT 0,
   FOREIGN KEY (`po_id`) REFERENCES `purchase_orders`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`item_id`) REFERENCES `items`(`id`)
@@ -355,10 +392,15 @@ INSERT INTO `permissions` (`name`, `description`) VALUES
 ('adjustments.view', 'Lihat penyesuaian stok'),
 ('adjustments.create', 'Buat penyesuaian stok'),
 ('adjustments.approve', 'Approve penyesuaian stok'),
+('stock_opname.view', 'Lihat stock opname'),
+('stock_opname.create', 'Buat sesi stock opname'),
+('stock_opname.count', 'Input hasil hitung stock opname'),
+('stock_opname.finalize', 'Finalisasi stock opname'),
 ('stock.view', 'Lihat stok'),
 ('purchase_orders.view', 'Lihat purchase order'),
 ('purchase_orders.create', 'Buat purchase order'),
 ('purchase_orders.edit', 'Edit purchase order'),
+('po.approve', 'Approve/reject purchase order'),
 ('purchase_orders.receive', 'Terima purchase order'),
 ('purchase_orders.cancel', 'Batalkan purchase order'),
 ('items.labels', 'Cetak label barcode'),
@@ -382,6 +424,7 @@ SELECT 3, id FROM `permissions` WHERE `name` IN (
   'dashboard.view','categories.view','units.view','suppliers.view','locations.view',
   'items.view','items.labels','stock_in.view','stock_in.create','stock_out.view','stock_out.create',
   'transfers.view','transfers.create','adjustments.view','adjustments.create','stock.view','stock.alerts',
+  'stock_opname.view','stock_opname.create','stock_opname.count',
   'purchase_orders.view','purchase_orders.create','purchase_orders.edit','purchase_orders.receive',
   'supplier_returns.view','supplier_returns.create','reports.view'
 );

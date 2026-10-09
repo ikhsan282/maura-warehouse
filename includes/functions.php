@@ -109,15 +109,17 @@ function generate_ref(string $prefix): string {
 }
 
 // Send email (shared hosting compatible)
-function send_mail(string $to, string $subject, string $body): bool {
-    $from      = MAIL_FROM;
-    $from_name = MAIL_FROM_NAME;
-    $headers   = "From: {$from_name} <{$from}>\r\n";
-    $headers  .= "Reply-To: {$from}\r\n";
-    $headers  .= "MIME-Version: 1.0\r\n";
-    $headers  .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers  .= "X-Mailer: PHP/" . PHP_VERSION;
-    return mail($to, $subject, $body, $headers);
+if (!function_exists('send_mail')) {
+    function send_mail(string $to, string $subject, string $body): bool {
+        $from      = MAIL_FROM;
+        $from_name = MAIL_FROM_NAME;
+        $headers   = "From: {$from_name} <{$from}>\r\n";
+        $headers  .= "Reply-To: {$from}\r\n";
+        $headers  .= "MIME-Version: 1.0\r\n";
+        $headers  .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers  .= "X-Mailer: PHP/" . PHP_VERSION;
+        return mail($to, $subject, $body, $headers);
+    }
 }
 
 // Email templates

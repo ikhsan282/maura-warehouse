@@ -77,6 +77,7 @@ maura-warehouse/
 │   └── verify-email.php
 ├── pages/
 │   ├── dashboard.php          # Stats, stok menipis, mutasi terbaru
+│   ├── stock-opname/          # Stock opname sessions, count, variance, finalize
 │   ├── items/                 # index, create, edit, view, delete
 │   ├── categories/            # index (CRUD modal)
 │   ├── units/                 # index (CRUD modal)

@@ -10,11 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $id = req_int('id'); $action = req_str('action');
     if ($action === 'order' && can('purchase_orders.edit')) {
-        $st=$db->prepare("UPDATE purchase_orders SET status='ordered' WHERE id=? AND status='draft'");
+        $st=$db->prepare("UPDATE purchase_orders SET status='pending', approval_status='pending' WHERE id=? AND status='draft'");
         $st->bind_param('i',$id); $st->execute(); $ok=$st->affected_rows; $st->close();
-        set_flash($ok?'success':'error',$ok?'Purchase order dikirim ke supplier.':'Status purchase order tidak dapat diubah.');
+        set_flash($ok?'success':'error',$ok?'Purchase order dikirim untuk approval.':'Status purchase order tidak dapat diubah.');
     } elseif ($action === 'cancel' && can('purchase_orders.cancel')) {
-        $st=$db->prepare("UPDATE purchase_orders SET status='cancelled' WHERE id=? AND status IN ('draft','ordered')");
+        $st=$db->prepare("UPDATE purchase_orders SET status='cancelled' WHERE id=? AND status IN ('draft','pending','partial')");
         $st->bind_param('i',$id); $st->execute(); $ok=$st->affected_rows; $st->close();
         set_flash($ok?'success':'error',$ok?'Purchase order dibatalkan.':'Purchase order tidak dapat dibatalkan.');
     } elseif ($action === 'delete' && can('purchase_orders.edit')) {
@@ -26,24 +26,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $status=req_str('status'); $where=''; $params=[]; $types='';
-if (in_array($status,['draft','ordered','received','cancelled'],true)) { $where='WHERE po.status=?'; $params[]=&$status; $types='s'; }
+if (in_array($status,['draft','pending','partial','completed','cancelled'],true)) { $where='WHERE po.status=?'; $params[]=&$status; $types='s'; }
 $st=$db->prepare("SELECT po.*,s.name supplier_name,l.name location_name,u.name user_name,
  (SELECT COUNT(*) FROM purchase_order_details d WHERE d.po_id=po.id) item_count,
  (SELECT COALESCE(SUM(quantity*buy_price),0) FROM purchase_order_details d WHERE d.po_id=po.id) total
  FROM purchase_orders po JOIN suppliers s ON s.id=po.supplier_id JOIN locations l ON l.id=po.location_id JOIN users u ON u.id=po.user_id $where ORDER BY po.id DESC");
 if($types)$st->bind_param($types,...$params); $st->execute(); $rows=$st->get_result()->fetch_all(MYSQLI_ASSOC); $st->close();
-$labels=['draft'=>['Draft','secondary'],'ordered'=>['Dipesan','primary'],'received'=>['Diterima','success'],'cancelled'=>['Dibatalkan','danger']];
+$labels=['draft'=>['Draft','secondary'],'pending'=>['Pending','warning'],'partial'=>['Sebagian','info'],'completed'=>['Selesai','success'],'cancelled'=>['Dibatalkan','danger']];
+$approval_labels=['draft'=>['Draft','secondary'],'pending'=>['Pending','warning'],'approved'=>['Approved','success'],'rejected'=>['Rejected','danger']];
 $page_title='Purchase Order'; include __DIR__.'/../../includes/header.php';
 ?>
 <div class="page-header d-flex justify-content-between align-items-center"><h4><i class="bi bi-cart-check me-2 text-primary"></i>Purchase Order</h4>
 <?php if(can('purchase_orders.create')):?><a class="btn btn-primary btn-sm" href="form.php"><i class="bi bi-plus-lg me-1"></i>Buat PO</a><?php endif;?></div>
 <div class="card table-card"><div class="card-header bg-white"><form method="get" class="d-flex gap-2"><select name="status" class="form-select form-select-sm" style="max-width:180px"><option value="">Semua status</option><?php foreach($labels as $key=>$label):?><option value="<?=$key?>" <?=$status===$key?'selected':''?>><?=$label[0]?></option><?php endforeach;?></select><button class="btn btn-sm btn-outline-secondary">Filter</button></form></div>
-<div class="table-responsive"><table class="table mb-0"><thead><tr><th>Nomor</th><th>Tanggal</th><th>Supplier</th><th>Tujuan</th><th>Item</th><th class="text-end">Nilai</th><th>Status</th><th class="text-center">Aksi</th></tr></thead><tbody>
-<?php if(!$rows):?><tr><td colspan="8" class="text-center text-muted py-4">Belum ada purchase order</td></tr><?php endif;?>
-<?php foreach($rows as $r): [$label,$color]=$labels[$r['status']];?><tr><td><a href="view.php?id=<?=$r['id']?>"><code><?=e($r['reference_no'])?></code></a></td><td><?=tgl($r['order_date'])?></td><td><?=e($r['supplier_name'])?></td><td><?=e($r['location_name'])?></td><td><?=$r['item_count']?></td><td class="text-end"><?=idr((float)$r['total'])?></td><td><span class="badge bg-<?=$color?>"><?=$label?></span></td><td class="text-center text-nowrap">
+<div class="table-responsive"><table class="table mb-0"><thead><tr><th>Nomor</th><th>Tanggal</th><th>Supplier</th><th>Tujuan</th><th>Item</th><th class="text-end">Nilai</th><th>Status</th><th>Approval</th><th class="text-center">Aksi</th></tr></thead><tbody>
+<?php if(!$rows):?><tr><td colspan="9" class="text-center text-muted py-4">Belum ada purchase order</td></tr><?php endif;?>
+<?php foreach($rows as $r): [$label,$color]=$labels[$r['status']]; [$alabel,$acolor]=$approval_labels[$r['approval_status']];?><tr><td><a href="view.php?id=<?=$r['id']?>"><code><?=e($r['reference_no'])?></code></a></td><td><?=tgl($r['order_date'])?></td><td><?=e($r['supplier_name'])?></td><td><?=e($r['location_name'])?></td><td><?=$r['item_count']?></td><td class="text-end"><?=idr((float)$r['total'])?></td><td><span class="badge bg-<?=$color?>"><?=$label?></span></td><td><span class="badge bg-<?=$acolor?>"><?=$alabel?></span></td><td class="text-center text-nowrap">
 <a class="btn btn-action btn-outline-info" href="view.php?id=<?=$r['id']?>"><i class="bi bi-eye"></i></a>
-<?php if($r['status']==='draft'&&can('purchase_orders.edit')):?><a class="btn btn-action btn-outline-primary" href="form.php?id=<?=$r['id']?>"><i class="bi bi-pencil"></i></a><form method="post" class="d-inline"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button name="action" value="order" class="btn btn-action btn-outline-success" title="Kirim pesanan"><i class="bi bi-send"></i></button><button name="action" value="delete" class="btn btn-action btn-outline-danger" data-confirm="Hapus draft PO?"><i class="bi bi-trash"></i></button></form><?php endif;?>
-<?php if($r['status']==='ordered'&&can('purchase_orders.receive')):?><form method="post" action="receive.php" class="d-inline"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button class="btn btn-action btn-success" data-confirm="Terima seluruh barang PO dan tambah stok?"><i class="bi bi-box-arrow-in-down"></i></button></form><?php endif;?>
-<?php if(in_array($r['status'],['draft','ordered'],true)&&can('purchase_orders.cancel')):?><form method="post" class="d-inline"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button name="action" value="cancel" class="btn btn-action btn-outline-danger" data-confirm="Batalkan PO?"><i class="bi bi-x-lg"></i></button></form><?php endif;?>
-</td></tr><?php endforeach;?></tbody></table></div></div>
+<?php if($r['status']==='draft'&&can('purchase_orders.edit')):?><a class="btn btn-action btn-outline-primary" href="form.php?id=<?=$r['id']?>"><i class="bi bi-pencil"></i></a><form method="post" class="d-inline"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button name="action" value="order" class="btn btn-action btn-outline-success" title="Kirim untuk approval"><i class="bi bi-send"></i></button><button name="action" value="delete" class="btn btn-action btn-outline-danger" data-confirm="Hapus draft PO?"><i class="bi bi-trash"></i></button></form><?php endif;?>
+<?php if($r['approval_status']==='pending'&&can('po.approve')):?><button class="btn btn-action btn-outline-success" data-bs-toggle="modal" data-bs-target="#approveModal<?=$r['id']?>" title="Approve"><i class="bi bi-check-lg"></i></button><button class="btn btn-action btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal<?=$r['id']?>" title="Reject"><i class="bi bi-x-lg"></i></button><?php endif;?>
+<?php if(in_array($r['status'],['pending','partial'],true)&&$r['approval_status']==='approved'&&can('purchase_orders.receive')):?><a href="view.php?id=<?=$r['id']?>" class="btn btn-action btn-success" title="Terima barang"><i class="bi bi-box-arrow-in-down"></i></a><?php endif;?>
+<?php if(in_array($r['status'],['draft','pending','partial'],true)&&can('purchase_orders.cancel')):?><form method="post" class="d-inline"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><button name="action" value="cancel" class="btn btn-action btn-outline-danger" data-confirm="Batalkan PO?"><i class="bi bi-x-lg"></i></button></form><?php endif;?>
+</td></tr>
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal<?=$r['id']?>" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post" action="approve.php"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><input type="hidden" name="action" value="approve"><div class="modal-header"><h5 class="modal-title">Approve PO <?=e($r['reference_no'])?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><label class="form-label">Catatan (opsional)</label><textarea name="approval_notes" class="form-control" rows="3"></textarea></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-success">Approve</button></div></form></div></div></div>
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal<?=$r['id']?>" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><form method="post" action="approve.php"><?=csrf_field()?><input type="hidden" name="id" value="<?=$r['id']?>"><input type="hidden" name="action" value="reject"><div class="modal-header"><h5 class="modal-title">Reject PO <?=e($r['reference_no'])?></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><label class="form-label">Alasan reject <span class="text-danger">*</span></label><textarea name="approval_notes" class="form-control" rows="3" required></textarea></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-danger">Reject</button></div></form></div></div></div>
+<?php endforeach;?></tbody></table></div></div>
 <?php include __DIR__.'/../../includes/footer.php';?>

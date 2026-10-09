@@ -78,7 +78,13 @@ function nav_active(string $path): string {
 
     <?php if (can('adjustments.view')): ?>
     <a href="<?= APP_URL ?>/pages/adjustments/index.php" class="sidebar-link <?= nav_active('/adjustments') ?>">
-      <i class="bi bi-clipboard-check"></i><span class="sidebar-label">Stok Opname</span>
+      <i class="bi bi-clipboard-check"></i><span class="sidebar-label">Penyesuaian Stok</span>
+    </a>
+    <?php endif; ?>
+
+    <?php if (can('stock_opname.view')): ?>
+    <a href="<?= APP_URL ?>/pages/stock-opname/index.php" class="sidebar-link <?= nav_active('/stock-opname') ?>">
+      <i class="bi bi-upc-scan"></i><span class="sidebar-label">Stock Opname</span>
     </a>
     <?php endif; ?>
 
