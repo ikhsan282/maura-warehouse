@@ -35,7 +35,7 @@ function get_low_stock_items(): array {
         JOIN units u ON u.id = i.unit_id
         LEFT JOIN stock s ON s.item_id = i.id
         WHERE i.is_active = 1
-        GROUP BY i.id
+        GROUP BY i.id, i.code, i.name, i.min_stock, u.abbreviation, i.buy_price
         HAVING total_stock <= i.min_stock
         ORDER BY total_stock ASC, i.name ASC
     ";

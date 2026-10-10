@@ -23,7 +23,7 @@ $low_stock = $db->query('SELECT i.code, i.name, i.min_stock, COALESCE(SUM(s.quan
     LEFT JOIN stock s ON s.item_id=i.id
     LEFT JOIN units u ON u.id=i.unit_id
     WHERE i.is_active=1
-    GROUP BY i.id HAVING total_stock <= i.min_stock
+    GROUP BY i.id, i.min_stock, i.code, i.name, u.abbreviation HAVING total_stock <= i.min_stock
     ORDER BY total_stock ASC LIMIT 10')->fetch_all(MYSQLI_ASSOC);
 
 // Today transactions

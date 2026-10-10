@@ -40,7 +40,7 @@ $locations = $db->query('SELECT id,code,name FROM locations WHERE is_active=1 OR
 
 // Summary stats
 $stat_zero = $db->query('SELECT COUNT(DISTINCT i.id) FROM items i LEFT JOIN stock s ON s.item_id=i.id WHERE i.is_active=1 GROUP BY i.id HAVING COALESCE(SUM(s.quantity),0)=0')->num_rows;
-$stat_low  = $db->query('SELECT COUNT(DISTINCT i.id) FROM items i LEFT JOIN stock s ON s.item_id=i.id WHERE i.is_active=1 GROUP BY i.id HAVING COALESCE(SUM(s.quantity),0) > 0 AND COALESCE(SUM(s.quantity),0) <= i.min_stock')->num_rows;
+$stat_low  = $db->query('SELECT COUNT(*) FROM items i LEFT JOIN (SELECT item_id,SUM(quantity) total_stock FROM stock GROUP BY item_id) s ON s.item_id=i.id WHERE i.is_active=1 AND COALESCE(s.total_stock,0) > 0 AND COALESCE(s.total_stock,0) <= i.min_stock')->fetch_row()[0];
 $stat_val  = $db->query('SELECT COALESCE(SUM(s.quantity * i.buy_price),0) FROM stock s JOIN items i ON i.id=s.item_id')->fetch_row()[0];
 
 $page_title='Cek Stok'; include __DIR__.'/../../includes/header.php';

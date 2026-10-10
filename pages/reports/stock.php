@@ -18,12 +18,12 @@ if ($loc_filter) { $where_parts[]='s.location_id=?';  $params[]=&$loc_filter; $t
 $where='WHERE '.implode(' AND ',$where_parts);
 
 $having = '';
-if ($show==='low')  $having = 'HAVING total_stock > 0 AND total_stock <= i.min_stock';
+if ($show==='low')  $having = 'HAVING total_stock > 0 AND total_stock <= MAX(i.min_stock)';
 if ($show==='zero') $having = 'HAVING total_stock = 0';
 
 $cq=$db->prepare("SELECT COUNT(*) FROM (
-    SELECT i.id, COALESCE(SUM(s.quantity),0) AS total_stock
-    FROM items i LEFT JOIN stock s ON s.item_id=i.id $where GROUP BY i.id $having) sub");
+    SELECT i.id, i.min_stock, COALESCE(SUM(s.quantity),0) AS total_stock
+    FROM items i LEFT JOIN stock s ON s.item_id=i.id $where GROUP BY i.id, i.min_stock $having) sub");
 if($types)$cq->bind_param($types,...$params);
 $cq->execute();$cq->bind_result($total);$cq->fetch();$cq->close();
 
@@ -36,7 +36,7 @@ $st=$db->prepare("SELECT i.id, i.code, i.name, i.min_stock, i.buy_price, i.sell_
     COALESCE(SUM(s.quantity)*i.buy_price,0) AS stock_value
     FROM items i JOIN categories c ON c.id=i.category_id JOIN units u ON u.id=i.unit_id
     LEFT JOIN stock s ON s.item_id=i.id $where
-    GROUP BY i.id $having ORDER BY i.code LIMIT ? OFFSET ?");
+    GROUP BY i.id, i.code, i.name, i.min_stock, i.buy_price, i.sell_price, c.name, u.abbreviation $having ORDER BY i.code LIMIT ? OFFSET ?");
 $st->bind_param($t2,...$p2); $st->execute();
 $rows=$st->get_result()->fetch_all(MYSQLI_ASSOC); $st->close();
 

@@ -180,7 +180,7 @@ $low = $db->query("
     LEFT JOIN stock s ON s.item_id=i.id 
     WHERE i.is_active=1 
     GROUP BY i.id 
-    HAVING total_stock <= i.min_stock
+    HAVING total_stock <= MAX(i.min_stock)
     ORDER BY total_stock
 ")->fetch_all(MYSQLI_ASSOC);
 
