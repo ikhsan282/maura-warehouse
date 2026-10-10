@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 require_perm('reports.view');
+ob_start();
 $db = getDB();
 
 $loc_filter = req_int('location_id');
@@ -49,10 +50,9 @@ $page_title='Laporan Stok'; include __DIR__.'/../../includes/header.php';
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-bar-chart-line me-2 text-primary"></i>Laporan Stok Barang</h4>
   <div class="btn-group btn-group-sm">
-    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'export'=>1])?>"
-       class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>CSV</a>
-    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'format'=>'pdf'])?>"
-       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
+    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['location_id'=>$loc_filter,'category_id'=>$cat_filter,'show'=>$show,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 
@@ -118,30 +118,47 @@ $page_title='Laporan Stok'; include __DIR__.'/../../includes/header.php';
 </div>
 <?php
 if (req_int('export')) {
+    ob_clean();
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="stok_'.date('Ymd').'.csv"');
     echo "\xEF\xBB\xBF";
     $out=fopen('php://output','w');
     fputcsv($out,['Kode','Nama Barang','Kategori','Satuan','Stok','Stok Min','Status','Harga Beli','Nilai Stok']);
-    foreach($rows as $r) {
+    $ex=$db->prepare("SELECT i.code, i.name, c.name AS cat_name, u.abbreviation, i.min_stock, i.buy_price,
+        COALESCE(SUM(s.quantity),0) AS total_stock, COALESCE(SUM(s.quantity)*i.buy_price,0) AS stock_value
+        FROM items i JOIN categories c ON c.id=i.category_id JOIN units u ON u.id=i.unit_id
+        LEFT JOIN stock s ON s.item_id=i.id $where
+        GROUP BY i.id, i.code, i.name, i.min_stock, i.buy_price, c.name, u.abbreviation $having ORDER BY i.code");
+    if($types)$ex->bind_param($types,...$params);
+    $ex->execute(); $rs=$ex->get_result();
+    while($r=$rs->fetch_assoc()) {
         $sl=$r['total_stock']==0?'Habis':($r['total_stock']<=$r['min_stock']?'Menipis':'Aman');
         fputcsv($out,[$r['code'],$r['name'],$r['cat_name'],$r['abbreviation'],
             $r['total_stock'],$r['min_stock'],$sl,$r['buy_price'],$r['stock_value']]);
     }
-    fclose($out); exit;
+    $ex->close(); fclose($out); exit;
 }
 if (req_str('format')==='pdf') {
+    ob_clean();
     require_once __DIR__.'/../../includes/pdf.php';
     $pdf = new SimplePDF();
     $pdf->addText('Laporan Stok Barang - '.date('d/m/Y'), 14);
     $pdf->addText('Total Nilai Inventori: '.idr((float)$total_value), 10);
     $pdf->addText('', 8);
     $pdf->addTableRow(['Kode','Nama','Kategori','Stok','Min','Status'],[60,120,80,50,40,60],true);
-    foreach($rows as $r) {
+    $ex=$db->prepare("SELECT i.code, i.name, c.name AS cat_name, u.abbreviation, i.min_stock,
+        COALESCE(SUM(s.quantity),0) AS total_stock
+        FROM items i JOIN categories c ON c.id=i.category_id JOIN units u ON u.id=i.unit_id
+        LEFT JOIN stock s ON s.item_id=i.id $where
+        GROUP BY i.id, i.code, i.name, i.min_stock, c.name, u.abbreviation $having ORDER BY i.code");
+    if($types)$ex->bind_param($types,...$params);
+    $ex->execute(); $rs=$ex->get_result();
+    while($r=$rs->fetch_assoc()) {
         $sl=$r['total_stock']==0?'Habis':($r['total_stock']<=$r['min_stock']?'Menipis':'Aman');
         $pdf->addTableRow([$r['code'],$r['name'],$r['cat_name'],$r['total_stock'],$r['min_stock'],$sl],
             [60,120,80,50,40,60]);
     }
+    $ex->close();
     header('Content-Type: application/pdf');
     header('Content-Disposition: attachment; filename="stok_'.date('Ymd').'.pdf"');
     echo $pdf->output(); exit;

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 require_perm('reports.view');
+ob_start();
 $db = getDB();
 
 $date_from  = req_str('date_from', date('Y-m-01'));
@@ -42,9 +43,9 @@ $page_title='Laporan Barang Keluar'; include __DIR__.'/../../includes/header.php
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i>Laporan Barang Keluar</h4>
   <div class="btn-group btn-group-sm">
-    <button onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'location_id'=>$loc_filter,'format'=>'pdf'])?>"
-       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'location_id'=>$loc_filter,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'location_id'=>$loc_filter,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 

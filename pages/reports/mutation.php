@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 require_perm('reports.view');
+ob_start();
 $db = getDB();
 
 $date_from  = req_str('date_from', date('Y-m-01'));
@@ -41,10 +42,9 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-arrow-down-up me-2 text-primary"></i>Laporan Mutasi Barang</h4>
   <div class="btn-group btn-group-sm">
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'export'=>1])?>"
-       class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>CSV</a>
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'format'=>'pdf'])?>"
-       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 
@@ -102,6 +102,7 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
 <?php
 // CSV export
 if (req_int('export')) {
+    ob_clean();
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="mutasi_'.date('Ymd').'.csv"');
     echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
@@ -122,6 +123,7 @@ if (req_int('export')) {
     $est->close(); fclose($out); exit;
 }
 if (req_str('format')==='pdf') {
+    ob_clean();
     require_once __DIR__.'/../../includes/pdf.php';
     $pdf = new SimplePDF();
     $pdf->addText('Laporan Mutasi Barang - '.date('d/m/Y'), 14);

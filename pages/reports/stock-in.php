@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/auth.php';
 require_once __DIR__ . '/../../includes/functions.php';
 
 require_perm('reports.view');
+ob_start();
 $db = getDB();
 
 $date_from   = req_str('date_from', date('Y-m-01'));
@@ -39,14 +40,33 @@ $tot=$db->prepare("SELECT COALESCE(SUM(d.quantity),0), COALESCE(SUM(d.quantity*d
 $tot->bind_param($types,...$params);$tot->execute();$tot->bind_result($period_qty,$period_val);$tot->fetch();$tot->close();
 
 $suppliers = $db->query('SELECT id,name FROM suppliers WHERE is_active=1 ORDER BY name')->fetch_all(MYSQLI_ASSOC);
+
+if (req_int('export')) {
+    ob_clean();
+    $export = $db->prepare("SELECT si.reference_no, si.transaction_date, s.name supplier_name, l.name location_name,
+        (SELECT COUNT(*) FROM stock_in_details d WHERE d.stock_in_id=si.id) item_count,
+        (SELECT COALESCE(SUM(d.quantity),0) FROM stock_in_details d WHERE d.stock_in_id=si.id) total_qty,
+        (SELECT COALESCE(SUM(d.quantity*d.buy_price),0) FROM stock_in_details d WHERE d.stock_in_id=si.id) total_value,
+        u.name user_name
+        FROM stock_in si JOIN suppliers s ON s.id=si.supplier_id JOIN locations l ON l.id=si.location_id JOIN users u ON u.id=si.user_id
+        $where ORDER BY si.transaction_date DESC, si.id DESC");
+    $export->bind_param($types,...$params); $export->execute(); $result=$export->get_result();
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="barang_masuk_'.date('Ymd').'.csv"');
+    echo "\xEF\xBB\xBF"; $out=fopen('php://output','w');
+    fputcsv($out,['Referensi','Tanggal','Supplier','Lokasi','Item','Total Qty','Nilai','Oleh']);
+    while($r=$result->fetch_assoc()) fputcsv($out,[$r['reference_no'],$r['transaction_date'],$r['supplier_name'],$r['location_name'],$r['item_count'],$r['total_qty'],$r['total_value'],$r['user_name']]);
+    fclose($out); $export->close(); exit;
+}
+
 $page_title='Laporan Barang Masuk'; include __DIR__.'/../../includes/header.php';
 ?>
 <div class="page-header d-flex align-items-center justify-content-between">
   <h4><i class="bi bi-file-earmark-arrow-down me-2 text-primary"></i>Laporan Barang Masuk</h4>
   <div class="btn-group btn-group-sm">
-    <button onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'supplier_id'=>$sup_filter,'format'=>'pdf'])?>"
-       class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'supplier_id'=>$sup_filter,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'supplier_id'=>$sup_filter,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 
@@ -108,6 +128,7 @@ $page_title='Laporan Barang Masuk'; include __DIR__.'/../../includes/header.php'
 </div>
 <?php
 if (req_str('format')==='pdf') {
+    ob_clean();
     require_once __DIR__.'/../../includes/pdf.php';
     $pdf = new SimplePDF();
     $pdf->addText('Laporan Barang Masuk - '.date('d/m/Y'), 14);
