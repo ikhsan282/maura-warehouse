@@ -104,6 +104,9 @@ html[data-bs-theme=dark] .table-hover tbody tr:hover { background: rgba(255,255,
 .table tbody tr:hover { background: #f0f4ff; }
 .table td, .table th { vertical-align: middle; }
 
+/* Tom Select dropdowns live under <body> so responsive/grid overflow cannot clip them. */
+.ts-dropdown { z-index: 1060; }
+
 /* ── Auth pages ─────────────────────────────────────────── */
 .auth-wrapper {
   min-height: 100vh;

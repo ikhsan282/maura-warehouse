@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.ts-select').forEach(function(el) {
     new TomSelect(el, {
       allowEmptyOption: true,
+      dropdownParent: 'body',
       placeholder: el.querySelector('option[value=""]')?.textContent || 'Pilih...'
     });
   });

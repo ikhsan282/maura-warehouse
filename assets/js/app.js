@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sel && window.TomSelect) {
       new TomSelect(sel, {
         allowEmptyOption: true,
+        dropdownParent: 'body',
         placeholder: sel.querySelector('option[value=""]')?.textContent || 'Pilih...'
       });
     }
