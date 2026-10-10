@@ -50,15 +50,15 @@ if ($current_user && can('stock.alerts')) {
         <button class="btn btn-sm btn-outline-secondary" id="darkToggle" title="Toggle tema">
           <i class="bi bi-moon-stars"></i>
         </button>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-          <i class="bi bi-shield-check me-1"></i><?= htmlspecialchars($current_user['role_name']) ?>
-        </span>
         <div class="dropdown">
           <button class="btn btn-sm btn-light dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
             <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;font-size:.8rem">
               <?= strtoupper(substr($current_user['name'], 0, 1)) ?>
             </div>
-            <span class="d-none d-md-inline"><?= htmlspecialchars($current_user['name']) ?></span>
+            <span class="d-none d-md-flex flex-column text-start lh-sm">
+              <span><?= htmlspecialchars($current_user['name']) ?></span>
+              <small class="text-muted" style="font-size:.7rem"><?= htmlspecialchars($current_user['role_name']) ?></small>
+            </span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow-sm">
             <li><span class="dropdown-item-text small text-muted"><?= htmlspecialchars($current_user['email']) ?></span></li>
