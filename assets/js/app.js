@@ -188,8 +188,13 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        scanTarget.value = option.value;
-        scanTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        if (scanTarget.tomselect) {
+          scanTarget.tomselect.setValue(option.value);
+          scanTarget.tomselect.refreshOptions(false);
+        } else {
+          scanTarget.value = option.value;
+          scanTarget.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         stopScanner(true);
       },
       () => {}
