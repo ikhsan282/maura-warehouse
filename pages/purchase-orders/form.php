@@ -13,7 +13,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
  $po=array_merge($po??[],['supplier_id'=>$supplier,'location_id'=>$location,'order_date'=>$order_date,'expected_date'=>$expected,'notes'=>$notes]);$details=array_map(fn($x)=>['item_id'=>$x[0],'quantity'=>$x[1],'buy_price'=>$x[2]],$valid);
 }
 $suppliers=$db->query('SELECT id,code,name FROM suppliers WHERE is_active=1 ORDER BY name')->fetch_all(MYSQLI_ASSOC);$locations=$db->query('SELECT id,code,name FROM locations WHERE is_active=1 ORDER BY code')->fetch_all(MYSQLI_ASSOC);$items=$db->query('SELECT id,code,name,buy_price FROM items WHERE is_active=1 ORDER BY name')->fetch_all(MYSQLI_ASSOC);
-if(!$details&&isset($_GET['suggested'])){$details=$db->query('SELECT i.id item_id,i.buy_price,GREATEST(i.min_stock*2-COALESCE(SUM(s.quantity),0),1) quantity FROM items i LEFT JOIN stock s ON s.item_id=i.id WHERE i.is_active=1 GROUP BY i.id HAVING COALESCE(SUM(s.quantity),0)<=i.min_stock ORDER BY i.name')->fetch_all(MYSQLI_ASSOC);}
+if(!$details&&isset($_GET['suggested'])){$details=$db->query('SELECT i.id item_id,i.buy_price,GREATEST(i.min_stock*2-COALESCE(s.total_stock,0),1) quantity FROM items i LEFT JOIN (SELECT item_id,SUM(quantity) total_stock FROM stock GROUP BY item_id) s ON s.item_id=i.id WHERE i.is_active=1 AND COALESCE(s.total_stock,0)<=i.min_stock ORDER BY i.name')->fetch_all(MYSQLI_ASSOC);}
 if(!$details)$details=[['item_id'=>0,'quantity'=>1,'buy_price'=>0]];
 $page_title=$id?'Edit Purchase Order':'Buat Purchase Order';include __DIR__.'/../../includes/header.php';
 ?>
