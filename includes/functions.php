@@ -166,6 +166,50 @@ function update_stock(int $item_id, int $location_id, int $delta): bool {
     return $result;
 }
 
+/**
+ * Validate that every line can be fulfilled from one location.
+ * $lines: list of [$item_id, $qty, $price]. Quantities for the same item are
+ * summed first, so two rows of the same item cannot slip past the check.
+ * Throws RuntimeException with a readable "Tersedia: N" message on failure.
+ */
+function assert_location_stock_available(mysqli $db, int $location_id, array $lines): void {
+    $wanted = [];
+    foreach ($lines as $line) {
+        $item_id = (int)$line[0];
+        $qty     = (int)$line[1];
+        if ($item_id > 0 && $qty > 0) $wanted[$item_id] = ($wanted[$item_id] ?? 0) + $qty;
+    }
+    if (!$wanted) return;
+
+    $st = $db->prepare('SELECT COALESCE(s.quantity,0) FROM items i
+        LEFT JOIN stock s ON s.item_id = i.id AND s.location_id = ?
+        WHERE i.id = ?');
+    $loc = $db->prepare('SELECT COALESCE(code,name) FROM locations WHERE id=?');
+    $loc->bind_param('i', $location_id); $loc->execute();
+    $loc->bind_result($loc_name); $loc->fetch(); $loc->close();
+
+    foreach ($wanted as $item_id => $qty) {
+        $available = 0;
+        $st->bind_param('ii', $location_id, $item_id);
+        $st->execute();
+        $st->bind_result($qty_row);
+        if ($st->fetch()) $available = (int)$qty_row;
+        $st->free_result();
+        if ($qty <= $available) continue;
+
+        $in = $db->prepare('SELECT name FROM items WHERE id=?');
+        $in->bind_param('i', $item_id); $in->execute();
+        $in->bind_result($item_name); $in->fetch(); $in->close();
+
+        $st->close();
+        throw new RuntimeException(sprintf(
+            'Stok %s tidak cukup di lokasi %s. Tersedia: %d, diminta: %d.',
+            $item_name, $loc_name ?: '-', $available, $qty
+        ));
+    }
+    $st->close();
+}
+
 // Log mutation
 function log_mutation(int $item_id, int $location_id, string $type, int $qty,
     string $ref_no, string $ref_type, int $ref_id, int $user_id, string $notes = ''): void {

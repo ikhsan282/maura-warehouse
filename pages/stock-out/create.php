@@ -28,18 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (empty($valid_items)) $errors[] = 'Tambahkan minimal 1 barang dengan kuantitas > 0.';
 
-    // Check available stock per item
-    if (empty($errors) && $location_id) {
-        foreach ($valid_items as [$iid, $qty]) {
-            $sc = $db->prepare('SELECT COALESCE(quantity,0) FROM stock WHERE item_id=? AND location_id=?');
-            $sc->bind_param('ii',$iid,$location_id); $sc->execute();
-            $sc->bind_result($avail); $sc->fetch(); $sc->close();
-            if ($qty > $avail) {
-                $in = $db->prepare('SELECT name FROM items WHERE id=?');
-                $in->bind_param('i',$iid); $in->execute();
-                $in->bind_result($iname); $in->fetch(); $in->close();
-                $errors[] = "Stok <strong>".htmlspecialchars($iname)."</strong> tidak cukup. Tersedia: {$avail}.";
-            }
+    // Check available stock per item at the selected source location.
+    if (empty($errors)) {
+        try {
+            assert_location_stock_available($db, $location_id, $valid_items);
+        } catch (RuntimeException $e) {
+            $errors[] = htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
         }
     }
 
