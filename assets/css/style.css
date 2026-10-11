@@ -139,3 +139,17 @@ html[data-bs-theme=dark] .table-hover tbody tr:hover { background: rgba(255,255,
   .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1049; }
   .sidebar-overlay.show { display: block; }
 }
+
+/* ---- Cetak: hanya konten laporan, tanpa topbar/sidebar/kontrol ---- */
+@media print {
+  #sidebar, .sidebar-overlay, .navbar, .no-print,
+  .btn, .btn-group, .pagination, .card-header, .card-footer,
+  .alert, #darkToggle, #sidebarToggle, #sidebarToggleMobile { display: none !important; }
+  .wrapper, .main-content, .content-area { display: block !important; margin: 0 !important; padding: 0 !important; }
+  .main-content { width: 100% !important; }
+  body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+  .card, .table-card { border: 0 !important; box-shadow: none !important; }
+  .table { font-size: 9.5pt; }
+  .table thead th { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a[href]::after { content: none !important; }
+}
