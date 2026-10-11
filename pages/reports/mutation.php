@@ -99,7 +99,4 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
     <?=pagination_html($pag,'?'.http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter]).'&page=%d')?>
   </div>
 </div>
-<?php
-// CSV export
-}
-include __DIR__.'/../../includes/footer.php'; ?>
+<?php include __DIR__.'/../../includes/footer.php'; ?>

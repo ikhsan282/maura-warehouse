@@ -1,8 +1,9 @@
 <?php
-$current_url = $_SERVER['REQUEST_URI'] ?? '';
+$current_url = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
 function nav_active(string $path): string {
     global $current_url;
-    return str_contains($current_url, $path) ? 'active' : '';
+    // Cocokkan segmen penuh: '/stock' aktif untuk '/stock/index.php', bukan '/stock-in/...'
+    return ($current_url === $path || str_starts_with($current_url, $path . '/')) ? 'active' : '';
 }
 ?>
 <nav id="sidebar" class="sidebar bg-dark text-white d-flex flex-column">
