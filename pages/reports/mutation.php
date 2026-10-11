@@ -43,8 +43,8 @@ $page_title='Laporan Mutasi Barang'; include __DIR__.'/../../includes/header.php
   <h4><i class="bi bi-arrow-down-up me-2 text-primary"></i>Laporan Mutasi Barang</h4>
   <div class="btn-group btn-group-sm">
     <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
-    <a href="?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <a href="mutation_export.php?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="mutation_export.php?<?=http_build_query(['date_from'=>$date_from,'date_to'=>$date_to,'item_id'=>$item_filter,'type'=>$type_filter,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 

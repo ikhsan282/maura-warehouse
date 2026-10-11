@@ -116,8 +116,8 @@ include __DIR__ . '/../../includes/header.php';
   <h4><i class="bi bi-graph-up me-2 text-primary"></i>Laporan Performa Supplier</h4>
   <div class="btn-group btn-group-sm">
     <button type="button" onclick="window.print()" class="btn btn-outline-secondary"><i class="bi bi-printer me-1"></i>Cetak</button>
-    <a href="?<?=http_build_query(['supplier_id'=>$supplier_filter,'start_date'=>$start_date,'end_date'=>$end_date,'export'=>1])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
-    <a href="?<?=http_build_query(['supplier_id'=>$supplier_filter,'start_date'=>$start_date,'end_date'=>$end_date,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+    <a href="supplier-performance_export.php?<?=http_build_query(['supplier_id'=>$supplier_filter,'start_date'=>$start_date,'end_date'=>$end_date])?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-spreadsheet me-1"></i>CSV</a>
+    <a href="supplier-performance_export.php?<?=http_build_query(['supplier_id'=>$supplier_filter,'start_date'=>$start_date,'end_date'=>$end_date,'format'=>'pdf'])?>" class="btn btn-outline-danger"><i class="bi bi-file-pdf me-1"></i>PDF</a>
   </div>
 </div>
 
@@ -205,77 +205,4 @@ include __DIR__ . '/../../includes/header.php';
     <?=pagination_html($pag, '?' . http_build_query(['supplier_id'=>$supplier_filter,'start_date'=>$start_date,'end_date'=>$end_date]) . '&page=%d')?>
   </div>
 </div>
-
-<?php
-// CSV Export
-if (req_int('export')) {
-    // Re-fetch all data without pagination for export
-    $export_query = "SELECT 
-        s.code,
-        s.name,
-        s.contact_person,
-        s.phone,
-        COUNT(DISTINCT po.id) as total_po,
-        SUM(CASE WHEN po.status='completed' THEN 1 ELSE 0 END) as completed_po,
-        AVG(CASE 
-            WHEN po.received_at IS NOT NULL AND po.order_date IS NOT NULL 
-            THEN DATEDIFF(po.received_at, po.order_date) 
-            ELSE NULL 
-        END) as avg_lead_time,
-        ROUND(
-            (SUM(CASE WHEN po.received_at IS NOT NULL AND po.expected_date IS NOT NULL 
-                AND po.received_at <= po.expected_date THEN 1 ELSE 0 END) / 
-             NULLIF(SUM(CASE WHEN po.received_at IS NOT NULL AND po.expected_date IS NOT NULL THEN 1 ELSE 0 END), 0)) * 100, 
-            2
-        ) as on_time_rate,
-        COALESCE(SUM(pod.quantity * pod.buy_price), 0) as total_value
-    FROM suppliers s
-    LEFT JOIN purchase_orders po ON s.id = po.supplier_id AND po.order_date BETWEEN ? AND ?
-    LEFT JOIN purchase_order_details pod ON po.id = pod.po_id
-    " . ($supplier_filter ? "WHERE s.id = ?" : "") . "
-    GROUP BY s.id
-    ORDER BY total_value DESC";
-    
-    $est = $db->prepare($export_query);
-    $export_params = [$start_date, $end_date];
-    $export_types = 'ss';
-    if ($supplier_filter) {
-        $export_params[] = $supplier_filter;
-        $export_types .= 'i';
-    }
-    $est->bind_param($export_types, ...$export_params);
-    $est->execute();
-    $export_rows = $est->get_result()->fetch_all(MYSQLI_ASSOC);
-    $est->close();
-    
-    header('Content-Type: text/csv; charset=UTF-8');
-    header('Content-Disposition: attachment; filename="supplier_performance_' . date('Ymd') . '.csv"');
-    echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
-    
-    $out = fopen('php://output', 'w');
-    fputcsv($out, ['Kode', 'Nama Supplier', 'Kontak', 'Telepon', 'Total PO', 'PO Selesai', 
-                   'Rata-rata Lead Time (hari)', 'On-Time Rate (%)', 'Total Nilai']);
-    
-    foreach($export_rows as $r) {
-        $completion_rate = $r['total_po'] > 0 ? round(($r['completed_po'] / $r['total_po']) * 100, 1) : 0;
-        $lead_time = $r['avg_lead_time'] !== null ? round($r['avg_lead_time'], 1) : '';
-        $on_time = $r['on_time_rate'] !== null ? $r['on_time_rate'] : '';
-        
-        fputcsv($out, [
-            $r['code'],
-            $r['name'],
-            $r['contact_person'] ?: '',
-            $r['phone'] ?: '',
-            $r['total_po'],
-            $r['completed_po'] . ' (' . $completion_rate . '%)',
-            $lead_time,
-            $on_time,
-            $r['total_value']
-        ]);
-    }
-    fclose($out);
-    exit;
-}
-
-include __DIR__ . '/../../includes/footer.php';
-?>
+<?php include __DIR__ . '/../../includes/footer.php'; ?>
