@@ -56,7 +56,7 @@ header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="barang_masuk_'.date('Ymd').'.csv"');
 echo "\xEF\xBB\xBF";
 $out=fopen('php://output','w');
-fputcsv($out,['Referensi','Tanggal','Supplier','Lokasi','Item','Total Qty','Nilai','Oleh']);
+fputcsv($out, ['Referensi','Tanggal','Supplier','Lokasi','Item','Total Qty','Nilai','Oleh'], ',', '"', '\\');
 
 $st=$db->prepare("SELECT si.reference_no, si.transaction_date, s.name supplier_name, l.name location_name,
     (SELECT COUNT(*) FROM stock_in_details d WHERE d.stock_in_id=si.id) item_count,
@@ -68,8 +68,8 @@ $st=$db->prepare("SELECT si.reference_no, si.transaction_date, s.name supplier_n
 $st->bind_param($types,...$params);
 $st->execute(); $rs=$st->get_result();
 while($r=$rs->fetch_assoc()) {
-    fputcsv($out,[$r['reference_no'],$r['transaction_date'],$r['supplier_name'],$r['location_name'],
-        $r['item_count'],$r['total_qty'],$r['total_value'],$r['user_name']]);
+    fputcsv($out, [$r['reference_no'],$r['transaction_date'],$r['supplier_name'],$r['location_name'],
+        $r['item_count'],$r['total_qty'],$r['total_value'],$r['user_name']], ',', '"', '\\');
 }
 $st->close();
 fclose($out);

@@ -78,7 +78,7 @@ header('Content-Disposition: attachment; filename="supplier_performance_'.date('
 echo "\xEF\xBB\xBF";
 $out = fopen('php://output', 'w');
 fputcsv($out, ['Kode', 'Nama Supplier', 'Kontak', 'Telepon', 'Total PO', 'PO Selesai', 
-               'Rata-rata Lead Time (hari)', 'On-Time Rate (%)', 'Total Nilai']);
+               'Rata-rata Lead Time (hari)', 'On-Time Rate (%)', 'Total Nilai'], ',', '"', '\\');
 
 $query = "SELECT s.code, s.name, s.contact_person, s.phone,
     COUNT(DISTINCT po.id) as total_po,
@@ -116,7 +116,7 @@ while($r=$rs->fetch_assoc()) {
         $lead_time,
         $on_time,
         $r['total_value']
-    ]);
+    ], ',', '"', '\\');
 }
 $st->close();
 fclose($out);

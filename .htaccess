@@ -20,6 +20,9 @@ RewriteRule ^config/       - [F,L]
 RewriteRule ^includes/     - [F,L]
 RewriteRule ^database/     - [F,L]
 
+# Block internal dirs not meant for the browser (tests, cron, docs, logs)
+RewriteRule ^(tests|cron|docs|logs)/ - [F,L]
+
 # Prevent access to .env, .git, etc.
 <FilesMatch "(^\.env|^\.git|\.sql$|\.log$|\.bak$)">
     Order Allow,Deny

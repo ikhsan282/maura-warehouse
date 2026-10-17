@@ -54,7 +54,7 @@ header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="barang_keluar_'.date('Ymd').'.csv"');
 echo "\xEF\xBB\xBF";
 $out=fopen('php://output','w');
-fputcsv($out,['Referensi','Tanggal','Lokasi','Penerima','Keperluan','Item','Total Qty','Oleh']);
+fputcsv($out, ['Referensi','Tanggal','Lokasi','Penerima','Keperluan','Item','Total Qty','Oleh'], ',', '"', '\\');
 
 $st=$db->prepare("SELECT so.reference_no, so.transaction_date, so.recipient, so.purpose,
     l.name AS location_name, u.name AS user_name,
@@ -64,8 +64,8 @@ $st=$db->prepare("SELECT so.reference_no, so.transaction_date, so.recipient, so.
     $where ORDER BY so.transaction_date DESC, so.id DESC");
 $st->bind_param($types,...$params); $st->execute(); $rs=$st->get_result();
 while($r=$rs->fetch_assoc()) {
-    fputcsv($out,[$r['reference_no'],$r['transaction_date'],$r['location_name'],
-        $r['recipient']??'-',$r['purpose']??'-',$r['item_count'],$r['total_qty'],$r['user_name']]);
+    fputcsv($out, [$r['reference_no'],$r['transaction_date'],$r['location_name'],
+        $r['recipient']??'-',$r['purpose']??'-',$r['item_count'],$r['total_qty'],$r['user_name']], ',', '"', '\\');
 }
 $st->close();
 fclose($out);

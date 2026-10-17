@@ -1,7 +1,13 @@
 #!/bin/bash
-# Low Stock Alert Cron Job
-# Run daily at 08:00
-# Add to crontab: 0 8 * * * /opt/data/projects/maura-warehouse/cron/low_stock_alert.sh
-
+# Low Stock Alert Cron Job — jalankan harian 08:00
+# crontab: 0 8 * * * /path/ke/maura-warehouse/cron/low_stock_alert.sh
+#
+# PHP: pakai $MW_PHP bila di-set (dev), kalau tidak jatuh ke `php` dari PATH (cPanel).
+set -euo pipefail
 cd "$(dirname "$0")/.."
-/opt/data/bin/php -c /opt/data/cache/scratch/mariadb/php-ext.ini includes/low_stock_alerts.php admin@maurawarehouse.com >> logs/low_stock_alerts.log 2>&1
+
+PHP_BIN=${MW_PHP:-php}
+RECIPIENT=${MW_ALERT_TO:-admin@maurawarehouse.com}
+
+# shellcheck disable=SC2086
+$PHP_BIN includes/low_stock_alerts.php "$RECIPIENT" >> logs/low_stock_alerts.log 2>&1

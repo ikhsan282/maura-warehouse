@@ -29,7 +29,7 @@ if (req_str('format')==='pdf') {
     $pdf->addTableRow(['Waktu','Kode','Barang','Tipe','Lokasi','Qty','Ref'],[40,50,80,50,50,30,50],true);
     
     $st=$db->prepare("SELECT m.created_at, i.code AS item_code, i.name AS item_name, m.type,
-        l.name AS loc_name, m.quantity, m.reference, u.abbreviation
+        l.name AS loc_name, m.quantity, m.reference_no, u.abbreviation
         FROM mutations m JOIN items i ON i.id=m.item_id JOIN units u ON u.id=i.unit_id
         JOIN locations l ON l.id=m.location_id JOIN users us ON us.id=m.user_id
         $where ORDER BY m.id DESC");
@@ -44,7 +44,7 @@ if (req_str('format')==='pdf') {
             $type_map[$r['type']]??$r['type'],
             $r['loc_name'],
             $r['quantity'].' '.$r['abbreviation'],
-            $r['reference']
+            $r['reference_no']
         ],[40,50,80,50,50,30,50]);
     }
     $st->close();
@@ -59,10 +59,10 @@ header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="mutasi_'.date('Ymd').'.csv"');
 echo "\xEF\xBB\xBF";
 $out=fopen('php://output','w');
-fputcsv($out,['Waktu','Kode Barang','Nama Barang','Tipe','Lokasi','Qty','Satuan','Referensi','Oleh']);
+fputcsv($out, ['Waktu','Kode Barang','Nama Barang','Tipe','Lokasi','Qty','Satuan','Referensi','Oleh'], ',', '"', '\\');
 
 $st=$db->prepare("SELECT m.created_at, i.code AS item_code, i.name AS item_name, m.type,
-    l.name AS loc_name, m.quantity, u.abbreviation, m.reference, us.name AS user_name
+    l.name AS loc_name, m.quantity, u.abbreviation, m.reference_no, us.name AS user_name
     FROM mutations m JOIN items i ON i.id=m.item_id JOIN units u ON u.id=i.unit_id
     JOIN locations l ON l.id=m.location_id JOIN users us ON us.id=m.user_id
     $where ORDER BY m.id DESC");
@@ -70,7 +70,7 @@ $st->bind_param($types,...$params);
 $st->execute(); $rs=$st->get_result();
 while($r=$rs->fetch_assoc()) {
     $type_map=['in'=>'Masuk','out'=>'Keluar','transfer_in'=>'Transfer In','transfer_out'=>'Transfer Out','adjustment'=>'Penyesuaian'];
-    fputcsv($out,[
+    fputcsv($out, [
         $r['created_at'],
         $r['item_code'],
         $r['item_name'],
@@ -78,9 +78,9 @@ while($r=$rs->fetch_assoc()) {
         $r['loc_name'],
         $r['quantity'],
         $r['abbreviation'],
-        $r['reference'],
+        $r['reference_no'],
         $r['user_name']
-    ]);
+    ], ',', '"', '\\');
 }
 $st->close();
 fclose($out);

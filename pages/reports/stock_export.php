@@ -55,7 +55,7 @@ header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="stok_'.date('Ymd').'.csv"');
 echo "\xEF\xBB\xBF";
 $out=fopen('php://output','w');
-fputcsv($out,['Kode','Nama Barang','Kategori','Satuan','Stok','Stok Min','Status','Harga Beli','Nilai Stok']);
+fputcsv($out, ['Kode','Nama Barang','Kategori','Satuan','Stok','Stok Min','Status','Harga Beli','Nilai Stok'], ',', '"', '\\');
 
 $st=$db->prepare("SELECT i.code, i.name, c.name AS cat_name, u.abbreviation, i.min_stock, i.buy_price,
     COALESCE(SUM(s.quantity),0) AS total_stock, COALESCE(SUM(s.quantity)*i.buy_price,0) AS stock_value
@@ -66,8 +66,8 @@ if($types)$st->bind_param($types,...$params);
 $st->execute(); $rs=$st->get_result();
 while($r=$rs->fetch_assoc()) {
     $sl=$r['total_stock']==0?'Habis':($r['total_stock']<=$r['min_stock']?'Menipis':'Aman');
-    fputcsv($out,[$r['code'],$r['name'],$r['cat_name'],$r['abbreviation'],
-        $r['total_stock'],$r['min_stock'],$sl,$r['buy_price'],$r['stock_value']]);
+    fputcsv($out, [$r['code'],$r['name'],$r['cat_name'],$r['abbreviation'],
+        $r['total_stock'],$r['min_stock'],$sl,$r['buy_price'],$r['stock_value']], ',', '"', '\\');
 }
 $st->close();
 fclose($out);
